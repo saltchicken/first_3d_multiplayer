@@ -63,3 +63,15 @@ replication_config = SubResource("SceneReplicationConfig_4flbx")
 unique_name_in_owner = true
 replication_config = SubResource("SceneReplicationConfig_hqtel")
 script = ExtResource("3_i3pqv")
+
+[node name="PauseMenu" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+visible = false
+
+[node name="Button" type="Button" parent="PauseMenu"]
+offset_left = 60.0
+offset_top = 75.0
+offset_right = 139.0
+offset_bottom = 107.0
+
+[connection signal="pressed" from="PauseMenu/Button" to="InputSynchronizer" method="leave_game"]

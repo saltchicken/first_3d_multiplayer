@@ -1,8 +1,10 @@
 extends MultiplayerSynchronizer
 
 @onready var player = $".."
+@onready var pause_menu = %PauseMenu
 
 var input_dir 
+var is_paused = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -19,6 +21,30 @@ func _physics_process(_delta):
 func _process(_delta):
 	if Input.is_action_just_pressed("jump"):
 		jump.rpc()
+	if Input.is_action_just_pressed("pause"):
+		# $"../".exit_game(name.to_int())
+		print("Pause was pressed")
+		toggle_pause()
+
+
+func leave_game():
+	multiplayer.multiplayer_peer.close()
+	queue_free()
+
+
+func toggle_pause():
+	is_paused = !is_paused
+	
+	if is_paused:
+		# Show pause menu
+		pause_menu.visible = true
+		# Optional: pause game for this player only
+		# get_tree().paused = true
+	else:
+		pause_menu.visible = false
+		# get_tree().paused = false
+	
+	print("Pause toggled: " + str(is_paused))
 
 @rpc("call_local")
 func jump():
