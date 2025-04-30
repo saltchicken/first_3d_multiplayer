@@ -10,10 +10,10 @@ func _ready():
 		set_process(false)
 		set_physics_process(false)
 	
-	input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	input_dir = Input.get_vector("left", "right", "up", "down")
 
 func _physics_process(_delta):
-	input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	input_dir = Input.get_vector("left", "right", "up", "down")
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
