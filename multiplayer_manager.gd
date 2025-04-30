@@ -34,7 +34,7 @@ func _add_player_to_game(id: int):
 	var player_to_add = player_scene.instantiate()
 	player_to_add.player_id = id
 	player_to_add.name = str(id)
-	player_to_add.position = Vector3(0, 10, 0)
+	player_to_add.position = Vector3(0, 3, 0)
 	_players_spawn_node.add_child(player_to_add, true)
 	
 func _del_player(id: int):

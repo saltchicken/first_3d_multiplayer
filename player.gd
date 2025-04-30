@@ -73,6 +73,9 @@ func _physics_process(delta):
 	if multiplayer.is_server():
 		_is_on_floor = is_on_floor()
 		_apply_movement_from_input(delta)
+
+	if not multiplayer.is_server():
+		_apply_animations(delta)
 	# Add the gravity.
 		# Handle jump.
 		# if Input.is_action_just_pressed("ui_accept") and is_on_floor():
