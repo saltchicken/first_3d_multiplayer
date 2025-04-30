@@ -1,0 +1,50 @@
+[gd_scene load_steps=4 format=3 uid="uid://bs7mo7ss2w0ft"]
+
+[ext_resource type="Script" uid="uid://bxtka4cofrknl" path="res://game_manager.gd" id="1_wbfu4"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ilcil"]
+size = Vector3(10, 0.5, 10)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_3hls8"]
+size = Vector3(10, 0.5, 10)
+
+[node name="Game" type="Node3D"]
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource("1_wbfu4")
+
+[node name="Floor" type="StaticBody3D" parent="."]
+metadata/_edit_group_ = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("BoxMesh_ilcil")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("BoxShape3D_3hls8")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 3, 8)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.25, 0.866025, -0.433013, 0.433013, 0.5, 0.75, 0.866025, 0, -0.5, -14, 4, 0)
+
+[node name="PauseMenu" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+
+[node name="Join" type="Button" parent="PauseMenu"]
+offset_left = 170.0
+offset_top = 261.0
+offset_right = 543.0
+offset_bottom = 411.0
+text = "Join
+"
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://bk6x4rvwunklf")
+spawn_path = NodePath("../Players")
+
+[node name="SpawnPoint" type="Node3D" parent="MultiplayerSpawner"]
+
+[node name="Players" type="Node" parent="."]
+
+[connection signal="pressed" from="PauseMenu/Join" to="GameManager" method="player_join"]
