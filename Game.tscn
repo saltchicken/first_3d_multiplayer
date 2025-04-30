@@ -43,8 +43,6 @@ text = "Join
 _spawnable_scenes = PackedStringArray("uid://bk6x4rvwunklf")
 spawn_path = NodePath("../Players")
 
-[node name="SpawnPoint" type="Node3D" parent="MultiplayerSpawner"]
-
 [node name="Players" type="Node" parent="."]
 
 [connection signal="pressed" from="PauseMenu/Join" to="GameManager" method="player_join"]
