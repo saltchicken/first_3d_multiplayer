@@ -44,7 +44,6 @@ func _peer_connected(id: int):
 	_players_spawn_node = get_tree().root.get_node("Game").get_node("Players")
 	print("Player %s joining" % id)
 	var player_to_add = player_scene.instantiate()
-	player_to_add.player_id = id
 	player_to_add.name = str(id)
 	player_to_add.position = Vector3(0, 3, 0)
 	_players_spawn_node.add_child(player_to_add, true)
@@ -61,8 +60,6 @@ func _connect_to_server():
 
 func _connection_failed():
 	print("Connection failed")
-
-
 
 
 func StartGame():

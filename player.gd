@@ -11,11 +11,7 @@ var do_jump = false
 var _is_on_floor = true
 var alive = true
 
-var player_id
-
-
 func _enter_tree():
-	print(name.to_int())
 	%InputSynchronizer.set_multiplayer_authority(name.to_int())
 
 # func _ready():
