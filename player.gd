@@ -6,8 +6,6 @@ const JUMP_VELOCITY = 5.0
 
 # var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
-var input_dir
-var do_jump = false
 var _is_on_floor = true
 var alive = true
 
@@ -39,20 +37,15 @@ func _apply_animations(_delta):
 	# 	animated_sprite.play("jump")
 
 func _apply_movement_from_input(delta):
-	# Add the gravity.
 	if not is_on_floor():
-		# velocity.y -= gravity * delta
 		velocity += get_gravity() * delta
-
-	# Handle jump.
-	if do_jump and is_on_floor():
-		velocity.y = JUMP_VELOCITY
-		do_jump = false
-
-	# Get the input direction: -1, 0, 1
-	input_dir = %InputSynchronizer.input_dir
 	
+	# Handle jump.
+	if %InputSynchronizer.input_jump and is_on_floor():
+		velocity.y = JUMP_VELOCITY
+
 	# Apply movement
+	var input_dir = %InputSynchronizer.input_dir
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	if direction:
 		velocity.x = direction.x * SPEED

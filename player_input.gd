@@ -3,7 +3,8 @@ extends MultiplayerSynchronizer
 @onready var player = $".."
 @onready var pause_menu = %PauseMenu
 
-var input_dir 
+var input_dir
+var input_jump
 var is_paused = false
 
 # Called when the node enters the scene tree for the first time.
@@ -19,8 +20,7 @@ func _physics_process(_delta):
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
-	if Input.is_action_just_pressed("jump"):
-		jump.rpc()
+	input_jump = Input.get_action_strength("jump")
 	if Input.is_action_just_pressed("pause"):
 		# $"../".exit_game(name.to_int())
 		print("Pause was pressed")
