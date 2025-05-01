@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://bs7mo7ss2w0ft"]
 
-[ext_resource type="Script" uid="uid://bxtka4cofrknl" path="res://game_manager.gd" id="1_wbfu4"]
+[ext_resource type="Script" uid="uid://dhis8fehawelg" path="res://pause_menu.gd" id="1_wbfu4"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_ilcil"]
 size = Vector3(10, 0.5, 10)
@@ -9,9 +9,6 @@ size = Vector3(10, 0.5, 10)
 size = Vector3(10, 0.5, 10)
 
 [node name="Game" type="Node3D"]
-
-[node name="GameManager" type="Node" parent="."]
-script = ExtResource("1_wbfu4")
 
 [node name="Floor" type="StaticBody3D" parent="."]
 metadata/_edit_group_ = true
@@ -30,8 +27,10 @@ transform = Transform3D(-0.25, 0.866025, -0.433013, 0.433013, 0.5, 0.75, 0.86602
 
 [node name="PauseMenu" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
+script = ExtResource("1_wbfu4")
 
 [node name="Join" type="Button" parent="PauseMenu"]
+unique_name_in_owner = true
 offset_left = 170.0
 offset_top = 261.0
 offset_right = 543.0
@@ -44,5 +43,3 @@ _spawnable_scenes = PackedStringArray("uid://bk6x4rvwunklf")
 spawn_path = NodePath("../Players")
 
 [node name="Players" type="Node" parent="."]
-
-[connection signal="pressed" from="PauseMenu/Join" to="GameManager" method="player_join"]
