@@ -21,8 +21,10 @@ func become_host():
 	
 	multiplayer.multiplayer_peer = server_peer
 	
-	multiplayer.peer_connected.connect(_add_player_to_game)
-	multiplayer.peer_disconnected.connect(_del_player)
+	multiplayer.peer_connected.connect(_peer_connected)
+	multiplayer.peer_disconnected.connect(_peer_disconnected)
+	multiplayer.connected_to_server.connect(_connect_to_server)
+	multiplayer.connection_failed.connect(_connection_failed)
 
 	self.load_world()
 
@@ -38,8 +40,7 @@ func player_join():
 
 	multiplayer.multiplayer_peer = client_peer
 
-func _add_player_to_game(id: int):
-	# print_tree_pretty()
+func _peer_connected(id: int):
 	_players_spawn_node = get_tree().root.get_node("Game").get_node("Players")
 	print("Player %s joining" % id)
 	var player_to_add = player_scene.instantiate()
@@ -49,12 +50,17 @@ func _add_player_to_game(id: int):
 	_players_spawn_node.add_child(player_to_add, true)
 	print("Player %s joined" % id)
 
-func _del_player(id: int):
+func _peer_disconnected(id: int):
 	print("Player %s left the game" % id)
 	if not _players_spawn_node.has_node(str(id)):
 		return
 	_players_spawn_node.get_node(str(id)).queue_free()
 
+func _connect_to_server():
+	print("Connected to server")
+
+func _connection_failed():
+	print("Connection failed")
 
 
 
