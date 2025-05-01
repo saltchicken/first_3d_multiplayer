@@ -7,7 +7,6 @@ var input_dir
 var input_jump
 var is_paused = false
 
-# Called when the node enters the scene tree for the first time.
 func _ready():
 	if get_multiplayer_authority() != multiplayer.get_unique_id():
 		set_process(false)
@@ -18,12 +17,9 @@ func _ready():
 func _physics_process(_delta):
 	input_dir = Input.get_vector("left", "right", "up", "down")
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
 	input_jump = Input.get_action_strength("jump")
 	if Input.is_action_just_pressed("pause"):
-		# $"../".exit_game(name.to_int())
-		print("Pause was pressed")
 		toggle_pause()
 
 
@@ -45,8 +41,3 @@ func toggle_pause():
 		# get_tree().paused = false
 	
 	print("Pause toggled: " + str(is_paused))
-
-@rpc("call_local")
-func jump():
-	if multiplayer.is_server():
-		player.do_jump = true
