@@ -22,7 +22,6 @@ func _enter_tree():
 #
 #
 func _apply_animations(_delta):
-	print("Apply animation")
 	var input_dir = %InputSynchronizer.input_dir
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	if direction.x > 0:
