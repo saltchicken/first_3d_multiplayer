@@ -9,6 +9,8 @@ const JUMP_VELOCITY = 5.0
 var _is_on_floor = true
 var alive = true
 
+@onready var animated_sprite = $"AnimatedSprite3D"
+
 func _enter_tree():
 	%InputSynchronizer.set_multiplayer_authority(name.to_int())
 
@@ -21,12 +23,19 @@ func _enter_tree():
 #
 func _apply_animations(_delta):
 	print("Apply animation")
-	# # Flip the Sprite
-	# if direction > 0:
-	# 	animated_sprite.flip_h = false
-	# elif direction < 0:
-	# 	animated_sprite.flip_h = true
-	#
+	var input_dir = %InputSynchronizer.input_dir
+	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	if direction.x > 0:
+		animated_sprite.play("walk_right")
+	elif direction.x < 0:
+		animated_sprite.play("walk_left")
+	elif direction.z > 0:
+		animated_sprite.play("walk_down")
+	elif direction.z < 0:
+		animated_sprite.play("walk_up")
+	else:
+		animated_sprite.play("idle")
+
 	# # Play animations
 	# if _is_on_floor:
 	# 	if direction == 0:
