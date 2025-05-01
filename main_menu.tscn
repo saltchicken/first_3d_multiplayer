@@ -1,0 +1,36 @@
+[gd_scene load_steps=2 format=3 uid="uid://c0eklroxr4765"]
+
+[ext_resource type="Script" uid="uid://45rqw1es1ea6" path="res://main_menu.gd" id="1_06t4h"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_06t4h")
+
+[node name="Join" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 623.0
+offset_top = 255.0
+offset_right = 873.0
+offset_bottom = 361.0
+text = "Join
+"
+
+[node name="Exit Game" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 238.0
+offset_top = 255.0
+offset_right = 488.0
+offset_bottom = 361.0
+text = "Exit Game"
+
+[node name="Name" type="LineEdit" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 225.0
+offset_top = 157.0
+offset_right = 900.0
+offset_bottom = 213.0
+placeholder_text = "Name"

@@ -24,6 +24,11 @@ func become_host():
 	multiplayer.peer_connected.connect(_add_player_to_game)
 	multiplayer.peer_disconnected.connect(_del_player)
 
+	self.load_world()
+
+func load_world():
+	var scene = preload("res://Game.tscn").instantiate()
+	get_tree().root.add_child.call_deferred(scene)
 
 func player_join():
 	print("Joining game")
@@ -34,7 +39,8 @@ func player_join():
 	multiplayer.multiplayer_peer = client_peer
 
 func _add_player_to_game(id: int):
-	_players_spawn_node = get_tree().get_current_scene().get_node("Players")
+	# print_tree_pretty()
+	_players_spawn_node = get_tree().root.get_node("Game").get_node("Players")
 	print("Player %s joining" % id)
 	var player_to_add = player_scene.instantiate()
 	player_to_add.player_id = id
@@ -48,3 +54,14 @@ func _del_player(id: int):
 	if not _players_spawn_node.has_node(str(id)):
 		return
 	_players_spawn_node.get_node(str(id)).queue_free()
+
+
+
+
+
+func StartGame():
+	var scene = preload("res://Game.tscn").instantiate()
+	get_tree().root.add_child(scene)
+	# var scene = preload("res://Game.tscn")
+	# print(get_tree().get_current_scene().name)
+	# get_tree().change_scene_to_packed(scene)
