@@ -12,7 +12,6 @@ signal game_state_changed(key, value)
 var game_state = {"players": {}}
 
 func update_game_state(key, value):
-	print("Updating game state")
 	if multiplayer.is_server():
 		if key.is_empty():
 			game_state = value
@@ -31,6 +30,7 @@ func notify_game_state_changed(key, value):
 
 func _ready():
 	var synchronizer = MultiplayerSynchronizer.new()
+	synchronizer.replication_interval = 0.25
 	add_child(synchronizer)
 
 	var replication_config = SceneReplicationConfig.new()
