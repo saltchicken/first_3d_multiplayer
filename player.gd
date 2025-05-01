@@ -16,14 +16,19 @@ func _enter_tree():
 	%InputSynchronizer.set_multiplayer_authority(name.to_int())
 
 func _ready():
-	if GameManager.game_state.players.has(name):
-		player_name_label.text = GameManager.game_state.players[name].name
-	else:
-		player_name_label.text = "Player " + name
+	GameManager.game_state_changed.connect(_on_game_state_changed)
 	# if multiplayer.get_unique_id() == player_id:
 	# 	$Camera2D.make_current()
 	# else:
 	# 	$Camera2D.enabled = false
+	#
+func _on_game_state_changed(key, _value):
+	print("Game state changed")
+	if key == "players":
+		if GameManager.game_state.players.has(name):
+			player_name_label.text = GameManager.game_state.players[name].name
+		else:
+			player_name_label.text = "Player " + name
 
 
 func _apply_animations(_delta):

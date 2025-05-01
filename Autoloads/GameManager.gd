@@ -7,7 +7,27 @@ const SERVER_IP = "main"
 var player_scene = preload("res://player.tscn")
 var _players_spawn_node
 
+signal game_state_changed(key, value)
+
 var game_state = {"players": {}}
+
+func update_game_state(key, value):
+	print("Updating game state")
+	if multiplayer.is_server():
+		if key.is_empty():
+			game_state = value
+		else:
+			game_state[key] = value
+		notify_game_state_changed.rpc(key, value)
+		# game_state_changed.emit(key, value)
+
+@rpc("authority")
+func notify_game_state_changed(key, value):
+	if key.is_empty():
+		game_state = value
+	else:
+		game_state[key] = value
+	game_state_changed.emit(key, value)
 
 func _ready():
 	var synchronizer = MultiplayerSynchronizer.new()
@@ -63,10 +83,12 @@ func register_player(client_id, player_name):
 		print("Security warning: Client tried to register with incorrect ID")
 		return
 	if not game_state.players.has(str(client_id)):
-		game_state.players[str(client_id)] = {
+		var players = game_state.players.duplicate()
+		players[str(client_id)] = {
 			"name": player_name,
 			"joined_at": Time.get_unix_time_from_system()
 		}
+		update_game_state("players", players)
 		print("Player registered: ", client_id, " as ", player_name)
 
 func _peer_connected(id: int):
