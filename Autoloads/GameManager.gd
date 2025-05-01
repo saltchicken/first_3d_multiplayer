@@ -23,8 +23,6 @@ func become_host():
 	
 	multiplayer.peer_connected.connect(_peer_connected)
 	multiplayer.peer_disconnected.connect(_peer_disconnected)
-	multiplayer.connected_to_server.connect(_connect_to_server)
-	multiplayer.connection_failed.connect(_connection_failed)
 
 	self.load_world()
 
@@ -54,13 +52,6 @@ func _peer_disconnected(id: int):
 	if not _players_spawn_node.has_node(str(id)):
 		return
 	_players_spawn_node.get_node(str(id)).queue_free()
-
-func _connect_to_server():
-	print("Connected to server")
-
-func _connection_failed():
-	print("Connection failed")
-
 
 func StartGame():
 	var scene = preload("res://Game.tscn").instantiate()
