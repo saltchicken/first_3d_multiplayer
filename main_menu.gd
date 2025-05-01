@@ -10,4 +10,4 @@ func _on_button_pressed():
 		player_name = "Player" + str(randi() % 1000)
 	self.hide()
 	GameManager.StartGame()
-	GameManager.player_join()
+	GameManager.player_join(player_name)
