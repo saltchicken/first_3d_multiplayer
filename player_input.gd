@@ -20,19 +20,15 @@ func _ready():
 func _physics_process(_delta):
 	input_dir = Input.get_vector("left", "right", "up", "down")
 	input_run = Input.is_action_pressed("run")
-
-func _process(_delta):
 	input_jump = Input.get_action_strength("jump")
 	input_push = Input.is_action_just_pressed("push")
 	if Input.is_action_just_pressed("pause"):
 		toggle_pause()
 
-
 func leave_game():
 	multiplayer.multiplayer_peer.close()
 	queue_free()
 	GameManager.LeaveGame()
-
 
 func toggle_pause():
 	is_paused = !is_paused
