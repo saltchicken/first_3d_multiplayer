@@ -1,9 +1,15 @@
-[gd_scene load_steps=4 format=3 uid="uid://bs7mo7ss2w0ft"]
+[gd_scene load_steps=6 format=3 uid="uid://bs7mo7ss2w0ft"]
 
 [ext_resource type="Script" uid="uid://bpwa18bghyk3n" path="res://game.gd" id="1_wbfu4"]
+[ext_resource type="Texture2D" uid="uid://d25ror1qy41nu" path="res://assets_task_01jt9b9tjhfcjvrkbemkz2fbdm_1746218082_img_0.webp" id="2_xkndl"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_ilcil"]
 size = Vector3(10, 0.5, 10)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u44n3"]
+albedo_texture = ExtResource("2_xkndl")
+uv1_scale = Vector3(-2.195, -2.195, -2.195)
+texture_filter = 0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3hls8"]
 size = Vector3(10, 0.5, 10)
@@ -16,6 +22,7 @@ metadata/_edit_group_ = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
 mesh = SubResource("BoxMesh_ilcil")
+surface_material_override/0 = SubResource("StandardMaterial3D_u44n3")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
 shape = SubResource("BoxShape3D_3hls8")
