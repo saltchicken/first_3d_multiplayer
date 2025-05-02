@@ -6,6 +6,8 @@ extends MultiplayerSynchronizer
 var input_dir
 var input_jump
 var input_push = false
+var input_run = false
+
 var is_paused = false
 
 func _ready():
@@ -17,6 +19,7 @@ func _ready():
 
 func _physics_process(_delta):
 	input_dir = Input.get_vector("left", "right", "up", "down")
+	input_run = Input.is_action_pressed("run")
 
 func _process(_delta):
 	input_jump = Input.get_action_strength("jump")

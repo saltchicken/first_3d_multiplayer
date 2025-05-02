@@ -2,6 +2,7 @@ extends CharacterBody3D
 
 
 const SPEED = 2.5
+const RUN_SPEED_MULTIPLIER = 1.8
 const JUMP_VELOCITY = 2.5
 
 const PUSH_FORCE = 200.0
@@ -102,14 +103,19 @@ func _apply_movement_from_input(delta):
 	var friction = FRICTION
 	velocity.x *= (1.0 - friction)
 	velocity.z *= (1.0 - friction)
+
+	# Determine speed based on run input
+	var current_speed = SPEED
+	if %InputSynchronizer.input_run:
+		current_speed *= RUN_SPEED_MULTIPLIER
 	
 	# Add to velocity instead of setting it directly
 	if direction:
-		velocity.x += direction.x * SPEED * delta * 10.0
-		velocity.z += direction.z * SPEED * delta * 10.0
+		velocity.x += direction.x * current_speed * delta * 10.0
+		velocity.z += direction.z * current_speed * delta * 10.0
 	
 	# Cap maximum horizontal speed
-	var max_speed = SPEED * 1.2
+	var max_speed = current_speed * 1.2
 	var horizontal_velocity = Vector2(velocity.x, velocity.z)
 	if horizontal_velocity.length() > max_speed:
 		horizontal_velocity = horizontal_velocity.normalized() * max_speed
