@@ -4,8 +4,9 @@
 [ext_resource type="Texture2D" uid="uid://tunf1xiuva2y" path="res://char_a_p1_0bas_demn_v01.png" id="2_onrkg"]
 [ext_resource type="Script" uid="uid://c3p0vg8fygcok" path="res://player_input.gd" id="3_i3pqv"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_i3pqv"]
-size = Vector3(0.172729, 0.304688, 0.133301)
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_i3pqv"]
+radius = 0.0784727
+height = 0.311799
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_i3pqv"]
 atlas = ExtResource("2_onrkg")
@@ -430,8 +431,8 @@ transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0)
 script = ExtResource("1_4flbx")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00982666, 0.0253907, -0.0124512)
-shape = SubResource("BoxShape3D_i3pqv")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0259644, 0)
+shape = SubResource("CapsuleShape3D_i3pqv")
 
 [node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="."]
 texture_filter = 0

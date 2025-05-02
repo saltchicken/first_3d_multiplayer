@@ -89,7 +89,7 @@ func _apply_movement_from_input(delta):
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	# Apply friction first to prevent excessive speed buildup
-	var friction = 0.05
+	var friction = 0.10
 	velocity.x *= (1.0 - friction)
 	velocity.z *= (1.0 - friction)
 	
