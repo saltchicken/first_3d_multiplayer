@@ -443,6 +443,7 @@ sprite_frames = SubResource("SpriteFrames_sweqy")
 animation = &"push_down"
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_interval = 0.01
 replication_config = SubResource("SceneReplicationConfig_4flbx")
 
 [node name="InputSynchronizer" type="MultiplayerSynchronizer" parent="."]
