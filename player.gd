@@ -37,10 +37,20 @@ func _on_game_state_changed(key, _value):
 		else:
 			player_name_label.text = "Player " + name
 
+var push_animation_timer = 0.0
 
 func _apply_animations(_delta):
 	var input_dir = %InputSynchronizer.input_dir
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	if push_animation_timer > 0:
+		push_animation_timer -= _delta
+		animated_sprite.play("push_" + last_direction)
+		return
+
+	if %InputSynchronizer.input_push:
+		push_animation_timer = 0.5
+		animated_sprite.play("push_" + last_direction)
+		return
 
 	if direction.length() > 0.1:
 		# Player is moving - update last_direction only if needed
@@ -57,18 +67,6 @@ func _apply_animations(_delta):
 		# Player is idle - play appropriate idle animation
 		animated_sprite.play("idle_" + last_direction)
 
-	# if push_cooldown > 0.8:  # First 0.2 seconds of cooldown show push animation
-	#	if direction.x > 0:
-	#		animated_sprite.play("push_right")
-	#	elif direction.x < 0:
-	#		animated_sprite.play("push_left")
-	#	elif direction.z > 0:
-	#		animated_sprite.play("push_down")
-	#	elif direction.z < 0:
-	#		animated_sprite.play("push_up")
-	#	else:
-	#		animated_sprite.play("push_down")
-	#	return
 	# else:
 	#
 	#
@@ -119,7 +117,7 @@ func _apply_movement_from_input(delta):
 	if %InputSynchronizer.input_push and push_cooldown <= 0:
 		print("push")
 		perform_push_attack()
-		push_cooldown = 0.2  # 1 second cooldown
+		push_cooldown = 0.5
 
 	if push_cooldown > 0:
 		push_cooldown -= delta
