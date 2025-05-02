@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://bs7mo7ss2w0ft"]
+[gd_scene load_steps=9 format=3 uid="uid://bs7mo7ss2w0ft"]
 
 [ext_resource type="Script" uid="uid://bpwa18bghyk3n" path="res://game.gd" id="1_wbfu4"]
 [ext_resource type="Texture2D" uid="uid://d25ror1qy41nu" path="res://assets_task_01jt9b9tjhfcjvrkbemkz2fbdm_1746218082_img_0.webp" id="2_xkndl"]
+[ext_resource type="Texture2D" uid="uid://crwwe303mqwup" path="res://lava.webp" id="3_u44n3"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_ilcil"]
 size = Vector3(10, 0.5, 10)
@@ -13,6 +14,15 @@ texture_filter = 0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3hls8"]
 size = Vector3(10, 0.5, 10)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sb48q"]
+albedo_texture = ExtResource("3_u44n3")
+uv1_scale = Vector3(-2.195, -0.38, -2.195)
+texture_filter = 0
+
+[sub_resource type="Environment" id="Environment_t88pq"]
+background_mode = 1
+background_color = Color(0, 0, 0.819608, 1)
 
 [node name="Game" type="Node3D"]
 script = ExtResource("1_wbfu4")
@@ -27,6 +37,17 @@ surface_material_override/0 = SubResource("StandardMaterial3D_u44n3")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
 shape = SubResource("BoxShape3D_3hls8")
 
+[node name="Lava" type="StaticBody3D" parent="."]
+transform = Transform3D(7.96128, 0, 0, 0, 7.96128, 0, 0, 0, 7.96128, 0, -7.31203, 0)
+metadata/_edit_group_ = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Lava"]
+mesh = SubResource("BoxMesh_ilcil")
+surface_material_override/0 = SubResource("StandardMaterial3D_sb48q")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Lava"]
+shape = SubResource("BoxShape3D_3hls8")
+
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 3, 8)
 
@@ -39,3 +60,6 @@ spawn_path = NodePath("../Players")
 
 [node name="Players" type="Node" parent="."]
 unique_name_in_owner = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_t88pq")
