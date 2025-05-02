@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bs7mo7ss2w0ft"]
+[gd_scene load_steps=13 format=3 uid="uid://bs7mo7ss2w0ft"]
 
 [ext_resource type="Script" uid="uid://bpwa18bghyk3n" path="res://game.gd" id="1_wbfu4"]
 [ext_resource type="Texture2D" uid="uid://d25ror1qy41nu" path="res://assets_task_01jt9b9tjhfcjvrkbemkz2fbdm_1746218082_img_0.webp" id="2_xkndl"]
@@ -13,7 +13,10 @@ uv1_scale = Vector3(-2.195, -2.195, -2.195)
 texture_filter = 0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3hls8"]
-size = Vector3(10, 0.457642, 10)
+size = Vector3(20.1236, 0.457642, 10)
+
+[sub_resource type="BoxMesh" id="BoxMesh_u44n3"]
+size = Vector3(20, 0.5, 10)
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_sb48q"]
 
@@ -37,7 +40,7 @@ shader_parameter/bubble_threshold = 0.75
 shader_parameter/bubble_size = 0.05
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_u44n3"]
-size = Vector3(10.3394, 0.489922, 10.3615)
+size = Vector3(20.4813, 0.489922, 10.3615)
 
 [sub_resource type="Environment" id="Environment_t88pq"]
 background_mode = 1
@@ -61,17 +64,17 @@ transform = Transform3D(7.96128, 0, 0, 0, 7.96128, 0, 0, 0, 7.96128, 0, -7.31203
 metadata/_edit_group_ = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Lava"]
-mesh = SubResource("BoxMesh_ilcil")
+mesh = SubResource("BoxMesh_u44n3")
 surface_material_override/0 = SubResource("ShaderMaterial_t88pq")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Lava"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0211792, 0)
+transform = Transform3D(1.00001, 0, 0, 0, 1.00001, 0, 0, 0, 1.00001, -0.0529029, -0.0211792, 0)
 shape = SubResource("BoxShape3D_3hls8")
 
 [node name="Area3D" type="Area3D" parent="Lava" groups=["lava"]]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Lava/Area3D"]
-transform = Transform3D(0.97501, 0, 0, 0, 0.97501, 0, 0, 0, 0.97501, -0.0373073, 0.116733, 0.108115)
+transform = Transform3D(0.975019, 0, 0, 0, 0.975019, 0, 0, 0, 0.975019, -0.0444058, 0.116733, 0.108115)
 shape = SubResource("BoxShape3D_u44n3")
 
 [node name="Camera3D" type="Camera3D" parent="."]
