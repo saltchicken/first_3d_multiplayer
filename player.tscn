@@ -453,6 +453,7 @@ shape = SubResource("CapsuleShape3D_i3pqv")
 texture_filter = 0
 sprite_frames = SubResource("SpriteFrames_sweqy")
 animation = &"death"
+frame_progress = 0.982659
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_interval = 0.01

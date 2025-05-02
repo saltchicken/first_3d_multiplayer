@@ -52,6 +52,10 @@ func _on_lava_entered(body):
 func player_died():
 	alive = false
 	animated_sprite.play("death")
+
+	var tween = create_tween()
+	tween.tween_property(animated_sprite, "modulate", Color(0, 0, 0, 1), 2.0)
+
 	if multiplayer.get_unique_id() == name.to_int():
 		%InputSynchronizer.set_process(false)
 		%InputSynchronizer.set_physics_process(false)
@@ -59,6 +63,7 @@ func player_died():
 @rpc("authority")
 func player_respawned():
 	alive = true
+	animated_sprite.modulate = Color(1, 1, 1, 1)
 	animated_sprite.play("idle_down")
 	if multiplayer.get_unique_id() == name.to_int():
 		%InputSynchronizer.set_process(true)
