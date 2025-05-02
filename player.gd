@@ -1,12 +1,13 @@
 extends CharacterBody3D
 
 
-const SPEED = 5.0
-const JUMP_VELOCITY = 5.0
+const SPEED = 2.5
+const JUMP_VELOCITY = 2.5
 
-const PUSH_FORCE = 10.0
+const PUSH_FORCE = 200.0
 const PUSH_RADIUS = 2.0
 var push_cooldown = 0.0
+const PUSH_COOLDOWN_DURATION = 0.25
 
 const FRICTION = 0.1
 
@@ -51,7 +52,7 @@ func _apply_animations(_delta):
 
 	# TODO: Fix the snchronization of applying push on server and animation on client
 	if %InputSynchronizer.input_push:
-		push_animation_timer = 0.25
+		push_animation_timer = PUSH_COOLDOWN_DURATION
 		animated_sprite.play("push_" + last_direction)
 		return
 
@@ -81,7 +82,7 @@ func _apply_movement_from_input(delta):
 	if %InputSynchronizer.input_push and push_cooldown <= 0:
 		print("push")
 		perform_push_attack()
-		push_cooldown = 0.25
+		push_cooldown = PUSH_COOLDOWN_DURATION
 
 	if push_cooldown > 0:
 		push_cooldown -= delta
@@ -151,7 +152,7 @@ func perform_push_attack():
 			
 			# Calculate push direction (away from pusher, preserving Y difference)
 			var push_dir = to_other.normalized()
-			var final_push_dir = push_dir * PUSH_FORCE * 50.0
+			var final_push_dir = push_dir * PUSH_FORCE
 			
 			# Add upward component
 			final_push_dir.y = 0
