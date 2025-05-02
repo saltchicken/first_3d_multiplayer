@@ -20,7 +20,6 @@ func update_game_state(key, value):
 		notify_game_state_changed.rpc(key, value)
 		# game_state_changed.emit(key, value)
 
-# TODO: Find out why game_state_changed is emitting multiple times for more than 1 client
 @rpc("authority")
 func notify_game_state_changed(key, value):
 	if key.is_empty():
