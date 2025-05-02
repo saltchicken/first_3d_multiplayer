@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.4", "Forward Plus")
 [autoload]
 
 GameManager="*res://Autoloads/GameManager.gd"
+PingManager="*res://PingManager.gd"
 
 [input]
 
