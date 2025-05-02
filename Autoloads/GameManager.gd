@@ -29,16 +29,6 @@ func notify_game_state_changed(key, value):
 	game_state_changed.emit(key, value)
 
 func _ready():
-	var synchronizer = MultiplayerSynchronizer.new()
-	synchronizer.replication_interval = 0.25
-	add_child(synchronizer)
-
-	var replication_config = SceneReplicationConfig.new()
-	replication_config.add_property(".:game_state")
-	synchronizer.replication_config = replication_config
-
-	synchronizer.set_multiplayer_authority(1)
-	
 	if OS.has_feature("dedicated_server"):
 		print("Starting dedicated server...")
 		self.become_host()
