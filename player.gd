@@ -156,6 +156,9 @@ func perform_push_attack():
 			var push_dir = to_other.normalized()
 			var final_push_dir = push_dir * PUSH_FORCE * 50.0
 			
+			# Add upward component
+			final_push_dir.y = 0
+			
 			# Apply push directly on server
 			other_player.velocity += final_push_dir
 			# Also send RPC to ensure client sees the push
