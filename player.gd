@@ -42,6 +42,21 @@ func _apply_animations(_delta):
 	var input_dir = %InputSynchronizer.input_dir
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
+	if direction.length() > 0.1:
+		# Player is moving - update last_direction only if needed
+		if abs(direction.x) > 0.1:
+			# Horizontal movement detected
+			last_direction = "right" if direction.x > 0 else "left"
+		elif abs(direction.z) > 0.1:
+			# Vertical movement detected
+			last_direction = "down" if direction.z > 0 else "up"
+		
+		# Play the walk animation for the current direction
+		animated_sprite.play("walk_" + last_direction)
+	else:
+		# Player is idle - play appropriate idle animation
+		animated_sprite.play("idle_" + last_direction)
+
 	# if push_cooldown > 0.8:  # First 0.2 seconds of cooldown show push animation
 	#	if direction.x > 0:
 	#		animated_sprite.play("push_right")
@@ -55,30 +70,34 @@ func _apply_animations(_delta):
 	#		animated_sprite.play("push_down")
 	#	return
 	# else:
-	if direction.x > 0:
-		animated_sprite.play("walk_right")
-		last_direction = "right"
-	elif direction.x < 0:
-		animated_sprite.play("walk_left")
-		last_direction = "left"
-	elif direction.z > 0:
-		animated_sprite.play("walk_down")
-		last_direction = "down"
-	elif direction.z < 0:
-		animated_sprite.play("walk_up")
-		last_direction = "up"
-	else:
-		if last_direction == "right":
-			animated_sprite.play("idle_right")
-		elif last_direction == "left":
-			animated_sprite.play("idle_left")
-		elif last_direction == "up":
-			animated_sprite.play("idle_up")
-		elif last_direction == "down":  # Default to down
-			animated_sprite.play("idle_down")
-		else:
-			#TODO: Handle this more elegantly
-			print("This shouldn't be possible")
+	#
+	#
+	#
+	#
+	# if direction.x > 0:
+	# 	animated_sprite.play("walk_right")
+	# 	last_direction = "right"
+	# elif direction.x < 0:
+	# 	animated_sprite.play("walk_left")
+	# 	last_direction = "left"
+	# elif direction.z > 0:
+	# 	animated_sprite.play("walk_down")
+	# 	last_direction = "down"
+	# elif direction.z < 0:
+	# 	animated_sprite.play("walk_up")
+	# 	last_direction = "up"
+	# else:
+	# 	if last_direction == "right":
+	# 		animated_sprite.play("idle_right")
+	# 	elif last_direction == "left":
+	# 		animated_sprite.play("idle_left")
+	# 	elif last_direction == "up":
+	# 		animated_sprite.play("idle_up")
+	# 	elif last_direction == "down":  # Default to down
+	# 		animated_sprite.play("idle_down")
+	# 	else:
+	# 		#TODO: Handle this more elegantly
+	# 		print("This shouldn't be possible")
 
 	# # Play animations
 	# if _is_on_floor:
