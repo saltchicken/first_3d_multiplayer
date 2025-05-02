@@ -8,6 +8,8 @@ const PUSH_FORCE = 10.0
 const PUSH_RADIUS = 2.0
 var push_cooldown = 0.0
 
+const FRICTION = 0.1
+
 var last_direction = "down"
 
 # var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -89,7 +91,7 @@ func _apply_movement_from_input(delta):
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	# Apply friction first to prevent excessive speed buildup
-	var friction = 0.10
+	var friction = FRICTION
 	velocity.x *= (1.0 - friction)
 	velocity.z *= (1.0 - friction)
 	
