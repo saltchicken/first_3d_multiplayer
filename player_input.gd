@@ -5,6 +5,7 @@ extends MultiplayerSynchronizer
 
 var input_dir
 var input_jump
+var input_push = false
 var is_paused = false
 
 func _ready():
@@ -19,6 +20,7 @@ func _physics_process(_delta):
 
 func _process(_delta):
 	input_jump = Input.get_action_strength("jump")
+	input_push = Input.is_action_just_pressed("push")
 	if Input.is_action_just_pressed("pause"):
 		toggle_pause()
 
