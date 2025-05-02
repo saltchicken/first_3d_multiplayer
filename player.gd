@@ -8,6 +8,8 @@ const PUSH_FORCE = 10.0
 const PUSH_RADIUS = 2.0
 var push_cooldown = 0.0
 
+var last_direction = "down"
+
 # var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 var _is_on_floor = true
@@ -55,14 +57,28 @@ func _apply_animations(_delta):
 	# else:
 	if direction.x > 0:
 		animated_sprite.play("walk_right")
+		last_direction = "right"
 	elif direction.x < 0:
 		animated_sprite.play("walk_left")
+		last_direction = "left"
 	elif direction.z > 0:
 		animated_sprite.play("walk_down")
+		last_direction = "down"
 	elif direction.z < 0:
 		animated_sprite.play("walk_up")
+		last_direction = "up"
 	else:
-		animated_sprite.play("idle")
+		if last_direction == "right":
+			animated_sprite.play("idle_right")
+		elif last_direction == "left":
+			animated_sprite.play("idle_left")
+		elif last_direction == "up":
+			animated_sprite.play("idle_up")
+		elif last_direction == "down":  # Default to down
+			animated_sprite.play("idle_down")
+		else:
+			#TODO: Handle this more elegantly
+			print("This shouldn't be possible")
 
 	# # Play animations
 	# if _is_on_floor:
