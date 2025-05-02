@@ -62,19 +62,30 @@ func load_world():
 	var scene = preload("res://Game.tscn").instantiate()
 	get_tree().root.add_child.call_deferred(scene)
 
+var _connection_callback = null
+
 func player_join(player_name):
+	if OS.has_feature("dedicated_server"):
+		return
 	print("Joining game")
+
+	if _connection_callback != null:
+		if multiplayer.connected_to_server.is_connected(_connection_callback):
+			multiplayer.connected_to_server.disconnect(_connection_callback)
+		_connection_callback = null
 
 	var client_peer = ENetMultiplayerPeer.new()
 	client_peer.create_client(SERVER_IP, SERVER_PORT)
 
 	multiplayer.multiplayer_peer = client_peer
 
-	multiplayer.connected_to_server.connect(func():
+	# Store the callback for later disconnection
+	_connection_callback = func():
 		var client_id = multiplayer.get_unique_id()
 		print("Connected as client with ID: ", client_id)
 		register_player.rpc(client_id, player_name)
-	)
+	
+	multiplayer.connected_to_server.connect(_connection_callback)
 
 @rpc("any_peer")
 func register_player(client_id, player_name):
@@ -83,14 +94,13 @@ func register_player(client_id, player_name):
 	if client_id != multiplayer.get_remote_sender_id():
 		print("Security warning: Client tried to register with incorrect ID")
 		return
-	if not game_state.players.has(str(client_id)):
-		var players = game_state.players.duplicate()
-		players[str(client_id)] = {
-			"name": player_name,
-			"joined_at": Time.get_unix_time_from_system()
-		}
-		update_game_state("players", players)
-		print("Player registered: ", client_id, " as ", player_name)
+	var players = game_state.players.duplicate()
+	players[str(client_id)] = {
+		"name": player_name,
+		"joined_at": Time.get_unix_time_from_system()
+	}
+	update_game_state("players", players)
+	print("Player registered: ", client_id, " as ", player_name)
 
 func _peer_connected(id: int):
 	_players_spawn_node = get_tree().root.get_node("Game").get_node("Players")
@@ -103,9 +113,16 @@ func _peer_connected(id: int):
 
 func _peer_disconnected(id: int):
 	print("Player %s left the game" % id)
-	if not _players_spawn_node.has_node(str(id)):
-		return
-	_players_spawn_node.get_node(str(id)).queue_free()
+	
+	# Remove player from game state
+	if multiplayer.is_server() and game_state.players.has(str(id)):
+		var players = game_state.players.duplicate()
+		players.erase(str(id))
+		update_game_state("players", players)
+	
+	# Remove player node
+	if _players_spawn_node and _players_spawn_node.has_node(str(id)):
+		_players_spawn_node.get_node(str(id)).queue_free()
 
 func StartGame():
 	var scene = preload("res://Game.tscn").instantiate()
@@ -113,3 +130,13 @@ func StartGame():
 	# var scene = preload("res://Game.tscn")
 	# print(get_tree().get_current_scene().name)
 	# get_tree().change_scene_to_packed(scene)
+	#
+func LeaveGame():
+	get_tree().root.get_node("Game").queue_free()
+	get_tree().root.get_node("MainMenu").show()
+	if _connection_callback != null:
+		if multiplayer.connected_to_server.is_connected(_connection_callback):
+			multiplayer.connected_to_server.disconnect(_connection_callback)
+		_connection_callback = null
+	
+	multiplayer.multiplayer_peer.close()

@@ -26,6 +26,7 @@ func _process(_delta):
 func leave_game():
 	multiplayer.multiplayer_peer.close()
 	queue_free()
+	GameManager.LeaveGame()
 
 
 func toggle_pause():

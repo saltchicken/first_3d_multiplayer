@@ -252,10 +252,11 @@ unique_name_in_owner = true
 visible = false
 
 [node name="Button" type="Button" parent="PauseMenu"]
-offset_left = 60.0
-offset_top = 75.0
-offset_right = 139.0
-offset_bottom = 107.0
+offset_left = 539.0
+offset_top = 289.0
+offset_right = 765.0
+offset_bottom = 370.0
+text = "Exit"
 
 [node name="PlayerNameLabel" type="Label3D" parent="."]
 unique_name_in_owner = true
