@@ -180,15 +180,3 @@ func _physics_process(delta):
 
 	if not multiplayer.is_server():
 		_apply_animations(delta)
-	# Add the gravity.
-		# Handle jump.
-		# if Input.is_action_just_pressed("ui_accept") and is_on_floor():
-		#	velocity.y = JUMP_VELOCITY
-		#
-		# if Input.is_action_just_pressed("ui_cancel"):
-		#	#$"../".exit_game(name.to_int())
-		#	get_tree().quit()
-
-		# Get the input direction and handle the movement/deceleration.
-		# As good practice, you should replace UI actions with custom gameplay actions.
-		# var input_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
