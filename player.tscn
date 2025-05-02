@@ -462,4 +462,11 @@ text = "Exit"
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.241533, 0)
 
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="PingLabel" type="Label" parent="HUD"]
+unique_name_in_owner = true
+offset_right = 40.0
+offset_bottom = 23.0
+
 [connection signal="pressed" from="PauseMenu/Button" to="InputSynchronizer" method="leave_game"]

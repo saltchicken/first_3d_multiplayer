@@ -27,6 +27,13 @@ func _enter_tree():
 func _ready():
 	add_to_group("players")
 	GameManager.game_state_changed.connect(_on_game_state_changed)
+	GameManager.ping_updated.connect(_on_ping_updated)
+
+func _on_ping_updated(ping_value):
+	if multiplayer.get_unique_id() == name.to_int():
+		# Only update ping for the local player
+		%PingLabel.text = "Ping: " + str(ping_value) + "ms"
+	#
 	# if multiplayer.get_unique_id() == player_id:
 	#	$Camera2D.make_current()
 	# else:
