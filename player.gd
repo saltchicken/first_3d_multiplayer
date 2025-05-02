@@ -30,6 +30,40 @@ func _ready():
 	GameManager.game_state_changed.connect(_on_game_state_changed)
 	PingManager.ping_updated.connect(_on_ping_updated)
 
+	if multiplayer.is_server():
+		# Find all lava areas in the scene
+		var lava_areas = get_tree().get_nodes_in_group("lava")
+		for lava in lava_areas:
+			lava.body_entered.connect(_on_lava_entered)
+
+func _on_lava_entered(body):
+	if not multiplayer.is_server():
+		return
+	print("Lava entered")
+	if body == self:
+		alive = false
+		player_died.rpc()
+		await get_tree().create_timer(3.0).timeout
+		global_position = Vector3(0, 3, 0)  # Respawn position
+		alive = true
+		player_respawned.rpc()
+
+@rpc("authority")
+func player_died():
+	alive = false
+	# animated_sprite.play("death_" + last_direction)
+	if multiplayer.get_unique_id() == name.to_int():
+		%InputSynchronizer.set_process(false)
+		%InputSynchronizer.set_physics_process(false)
+
+@rpc("authority")
+func player_respawned():
+	alive = true
+	# animated_sprite.play("idle_" + last_direction)
+	if multiplayer.get_unique_id() == name.to_int():
+		%InputSynchronizer.set_process(true)
+		%InputSynchronizer.set_physics_process(true)
+
 func _on_ping_updated(ping_value):
 	if multiplayer.get_unique_id() == name.to_int():
 		# Only update ping for the local player
@@ -187,7 +221,8 @@ func apply_push(push_vector):
 func _physics_process(delta):
 	if multiplayer.is_server():
 		_is_on_floor = is_on_floor()
-		_apply_movement_from_input(delta)
+		if alive:
+			_apply_movement_from_input(delta)
 
 	if not multiplayer.is_server():
 		_apply_animations(delta)
