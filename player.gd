@@ -51,7 +51,7 @@ func _on_lava_entered(body):
 @rpc("authority")
 func player_died():
 	alive = false
-	# animated_sprite.play("death_" + last_direction)
+	animated_sprite.play("death")
 	if multiplayer.get_unique_id() == name.to_int():
 		%InputSynchronizer.set_process(false)
 		%InputSynchronizer.set_physics_process(false)
@@ -59,7 +59,7 @@ func player_died():
 @rpc("authority")
 func player_respawned():
 	alive = true
-	# animated_sprite.play("idle_" + last_direction)
+	animated_sprite.play("idle_down")
 	if multiplayer.get_unique_id() == name.to_int():
 		%InputSynchronizer.set_process(true)
 		%InputSynchronizer.set_physics_process(true)
@@ -85,6 +85,8 @@ func _on_game_state_changed(key, _value):
 var push_animation_timer = 0.0
 
 func _apply_animations(_delta):
+	if alive == false:
+		return
 	var input_dir = %InputSynchronizer.input_dir
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	if push_animation_timer > 0:
