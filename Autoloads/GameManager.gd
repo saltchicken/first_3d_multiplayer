@@ -139,3 +139,4 @@ func LeaveGame():
 		_connection_callback = null
 	
 	multiplayer.multiplayer_peer.close()
+	print("Left game")
