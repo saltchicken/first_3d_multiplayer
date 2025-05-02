@@ -47,8 +47,9 @@ func _apply_animations(_delta):
 		animated_sprite.play("push_" + last_direction)
 		return
 
+	# TODO: Fix the snchronization of applying push on server and animation on client
 	if %InputSynchronizer.input_push:
-		push_animation_timer = 0.5
+		push_animation_timer = 0.25
 		animated_sprite.play("push_" + last_direction)
 		return
 
@@ -67,45 +68,6 @@ func _apply_animations(_delta):
 		# Player is idle - play appropriate idle animation
 		animated_sprite.play("idle_" + last_direction)
 
-	# else:
-	#
-	#
-	#
-	#
-	# if direction.x > 0:
-	# 	animated_sprite.play("walk_right")
-	# 	last_direction = "right"
-	# elif direction.x < 0:
-	# 	animated_sprite.play("walk_left")
-	# 	last_direction = "left"
-	# elif direction.z > 0:
-	# 	animated_sprite.play("walk_down")
-	# 	last_direction = "down"
-	# elif direction.z < 0:
-	# 	animated_sprite.play("walk_up")
-	# 	last_direction = "up"
-	# else:
-	# 	if last_direction == "right":
-	# 		animated_sprite.play("idle_right")
-	# 	elif last_direction == "left":
-	# 		animated_sprite.play("idle_left")
-	# 	elif last_direction == "up":
-	# 		animated_sprite.play("idle_up")
-	# 	elif last_direction == "down":  # Default to down
-	# 		animated_sprite.play("idle_down")
-	# 	else:
-	# 		#TODO: Handle this more elegantly
-	# 		print("This shouldn't be possible")
-
-	# # Play animations
-	# if _is_on_floor:
-	#	if direction == 0:
-	#		animated_sprite.play("idle")
-	#	else:
-	#		animated_sprite.play("run")
-	# else:
-	#	animated_sprite.play("jump")
-
 func _apply_movement_from_input(delta):
 	if not is_on_floor():
 		velocity += get_gravity() * delta
@@ -117,7 +79,7 @@ func _apply_movement_from_input(delta):
 	if %InputSynchronizer.input_push and push_cooldown <= 0:
 		print("push")
 		perform_push_attack()
-		push_cooldown = 0.5
+		push_cooldown = 0.25
 
 	if push_cooldown > 0:
 		push_cooldown -= delta
