@@ -90,6 +90,11 @@ func _apply_movement_from_input(delta):
 		direction.z = input_dir.y
 		direction = direction.normalized()
 	
+		if abs(input_dir.x) > abs(input_dir.y):
+			last_direction = "right" if input_dir.x > 0 else "left"
+		else:
+			last_direction = "down" if input_dir.y > 0 else "up"
+	
 	# Apply friction
 	velocity.x *= (1.0 - FRICTION)
 	velocity.z *= (1.0 - FRICTION)
@@ -195,6 +200,7 @@ func perform_push_attack():
 	
 	# Find players in radius
 	print(forward_direction)
+	print(last_direction)
 	var players = get_tree().get_nodes_in_group("players")
 	
 	for other_player in players:
