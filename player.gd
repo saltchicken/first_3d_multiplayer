@@ -1,6 +1,5 @@
 extends CharacterBody3D
 
-
 const SPEED = 2.5
 const RUN_SPEED_MULTIPLIER = 1.8
 const JUMP_VELOCITY = 2.5
@@ -11,8 +10,6 @@ var push_cooldown = 0.0
 var push_animation_timer = 0.0
 const PUSH_COOLDOWN_DURATION = 0.1
 
-#TODO: Should not need animation timer and cooldown. Animation timer is working on client. Cooldown is working on server with physics
-
 const JUMP_ANIMATION_DURATION = 0.5
 var jump_animation_timer = 0.0
 const JUMP_COOLDOWN = 0.7
@@ -21,23 +18,11 @@ var jump_cooldown_timer = 0.0
 const FRICTION = 0.2
 
 var last_direction = "down"
-
-const MOUSE_SENSITIVITY = 0.002
-const MIN_CAMERA_ROTATION = -0.6  # Looking up limit
-const MAX_CAMERA_ROTATION = 0.9   # Looking down limit
-
-# Camera distance variables
-const DEFAULT_CAMERA_DISTANCE = 0.5  # Default distance from pivot
-const MIN_CAMERA_DISTANCE = 0.2		 # Closest distance when looking down
-
-# var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
-
 var _is_on_floor = true
 var alive = true
 
 @onready var animated_sprite = $"AnimatedSprite3D"
 @onready var player_name_label = %PlayerNameLabel
-
 @onready var camera_pivot = $CameraPivot
 @onready var camera = $CameraPivot/Camera3D
 
@@ -54,7 +39,6 @@ func _ready():
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	else:
 		print("Player init on instance that is not client")
-		# camera.enabled = false
 
 	if multiplayer.is_server():
 		# Find all lava areas in the scene
@@ -62,42 +46,178 @@ func _ready():
 		for lava in lava_areas:
 			lava.body_entered.connect(_on_lava_entered)
 
-func _unhandled_input(event):
-	if multiplayer.get_unique_id() != name.to_int():
-		return
-	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		# Rotate player horizontally (around Y axis)
-		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
-		
-		# Rotate camera vertically with proper clamping
-		var current_rotation = camera_pivot.rotation.x
-		var new_rotation = clamp(current_rotation - event.relative.y * MOUSE_SENSITIVITY, 
-								MIN_CAMERA_ROTATION, MAX_CAMERA_ROTATION)
-		camera_pivot.rotation.x = new_rotation
-		
-		# Adjust camera distance based on rotation
-		_adjust_camera_distance(new_rotation)
-
-# Add this new function to adjust camera distance
-func _adjust_camera_distance(rotation_angle):
-	# Calculate how far down we're looking (0 to 1 range)
-	var look_down_factor = (rotation_angle - MIN_CAMERA_ROTATION) / (MAX_CAMERA_ROTATION - MIN_CAMERA_ROTATION)
-	look_down_factor = clamp(look_down_factor, 0.0, 1.0)
+func _physics_process(delta):
+	if multiplayer.is_server():
+		_is_on_floor = is_on_floor()
+		if alive:
+			_apply_movement_from_input(delta)
 	
-	# Only adjust distance when looking below horizontal (positive rotation)
-	if rotation_angle > -30:
-		# Calculate new distance (closer when looking down)
-		var new_distance = lerp(DEFAULT_CAMERA_DISTANCE, MIN_CAMERA_DISTANCE, look_down_factor)
+	if not multiplayer.is_server():
+		_apply_animations(delta)
+
+func _apply_movement_from_input(delta):
+	# Apply gravity
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+	
+	# Get synchronized input from client
+	var input_dir = %InputSynchronizer.input_dir
+	var input_rot = %InputSynchronizer.input_rot
+	var input_jump = %InputSynchronizer.input_jump
+	var input_push = %InputSynchronizer.input_push
+	var input_run = %InputSynchronizer.input_run
+	
+	# Handle jump
+	if input_jump and is_on_floor() and jump_cooldown_timer <= 0:
+		velocity.y = JUMP_VELOCITY
+		jump_cooldown_timer = JUMP_COOLDOWN
+	
+	# Update cooldown timers
+	if jump_cooldown_timer > 0:
+		jump_cooldown_timer -= delta
+	if push_cooldown > 0:
+		push_cooldown -= delta
+	
+	# Handle push attack
+	if input_push and push_cooldown <= 0:
+		perform_push_attack()
+		push_cooldown = PUSH_COOLDOWN_DURATION
+	
+	# Calculate movement direction based on client's camera rotation
+	var direction = Vector3.ZERO
+	if input_dir.length() > 0.1:
+		# Convert 2D input to 3D direction using client's camera rotation
+		var cam_rotation = input_rot.y
+		direction.x = input_dir.x * cos(cam_rotation) - input_dir.y * sin(cam_rotation)
+		direction.z = input_dir.x * sin(cam_rotation) + input_dir.y * cos(cam_rotation)
+		direction = direction.normalized()
+	
+	# Apply friction
+	velocity.x *= (1.0 - FRICTION)
+	velocity.z *= (1.0 - FRICTION)
+	
+	# Apply movement force
+	var current_speed = SPEED
+	if input_run:
+		current_speed *= RUN_SPEED_MULTIPLIER
+	
+	if direction:
+		velocity.x += direction.x * current_speed * delta * 10.0
+		velocity.z += direction.z * current_speed * delta * 10.0
+	
+	# Cap horizontal speed
+	var max_speed = current_speed * 1.2
+	var horizontal_velocity = Vector2(velocity.x, velocity.z)
+	if horizontal_velocity.length() > max_speed:
+		horizontal_velocity = horizontal_velocity.normalized() * max_speed
+		velocity.x = horizontal_velocity.x
+		velocity.z = horizontal_velocity.y
+	
+	# Apply movement
+	move_and_slide()
+
+func _apply_animations(delta):
+	if not alive:
+		return
+	
+	# Get raw input for animation determination
+	var raw_input = Input.get_vector("left", "right", "up", "down")
+	var input_jump = %InputSynchronizer.input_jump
+	var input_push = %InputSynchronizer.input_push
+	var input_run = %InputSynchronizer.input_run
+	
+	# Update animation timers
+	if push_animation_timer > 0:
+		push_animation_timer -= delta
+	if jump_animation_timer > 0:
+		jump_animation_timer -= delta
+	if jump_cooldown_timer > 0:
+		jump_cooldown_timer -= delta
+	
+	# Handle push animation priority
+	if push_animation_timer > 0:
+		animated_sprite.play("push_" + last_direction)
+		return
+	
+	# Start push animation
+	if input_push and push_animation_timer <= 0:
+		push_animation_timer = PUSH_COOLDOWN_DURATION
+		animated_sprite.play("push_" + last_direction)
+		return
+	
+	# Handle jump animation priority
+	if jump_animation_timer > 0:
+		animated_sprite.play("jump_" + last_direction)
+		return
+	
+	# Start jump animation
+	if input_jump and is_on_floor() and jump_cooldown_timer <= 0:
+		jump_animation_timer = JUMP_ANIMATION_DURATION
+		jump_cooldown_timer = JUMP_COOLDOWN
+		animated_sprite.play("jump_" + last_direction)
+		return
+	
+	# Determine facing direction based on input
+	if raw_input.length() > 0.1:
+		if abs(raw_input.x) > abs(raw_input.y):
+			last_direction = "right" if raw_input.x > 0 else "left"
+		else:
+			last_direction = "down" if raw_input.y > 0 else "up"
 		
-		# Apply new distance to camera's z position
-		var camera_transform = camera.transform
-		camera_transform.origin.z = new_distance
-		camera.transform = camera_transform
+		if input_run:
+			animated_sprite.play("run_" + last_direction)
+		else:
+			animated_sprite.play("walk_" + last_direction)
+			animated_sprite.speed_scale = 1.0
 	else:
-		# Reset to default distance when looking up
-		var camera_transform = camera.transform
-		camera_transform.origin.z = DEFAULT_CAMERA_DISTANCE
-		camera.transform = camera_transform
+		animated_sprite.play("idle_" + last_direction)
+		animated_sprite.speed_scale = 1.0
+
+func perform_push_attack():
+	if not multiplayer.is_server():
+		return
+	
+	var input_dir = %InputSynchronizer.input_dir
+	var forward_direction
+	
+	if input_dir.length() > 0.1:
+		var cam_rotation = %InputSynchronizer.input_rot.y
+		forward_direction = Vector3(
+			input_dir.x * cos(cam_rotation) - input_dir.y * sin(cam_rotation),
+			0,
+			input_dir.x * sin(cam_rotation) + input_dir.y * cos(cam_rotation)
+		).normalized()
+	else:
+		var direction_map = {
+			"up": Vector3(0, 0, -1),
+			"down": Vector3(0, 0, 1),
+			"left": Vector3(-1, 0, 0),
+			"right": Vector3(1, 0, 0)
+		}
+		forward_direction = direction_map[last_direction]
+	
+	var players = get_tree().get_nodes_in_group("players")
+	
+	for other_player in players:
+		if other_player == self:
+			continue
+		
+		var to_other = other_player.global_position - global_position
+		var to_other_flat = Vector3(to_other.x, 0, to_other.z)
+		var distance = to_other_flat.length()
+		
+		if distance < PUSH_RADIUS:
+			var push_dir = to_other.normalized()
+			var final_push_dir = push_dir * PUSH_FORCE
+			final_push_dir.y = 0
+			
+			other_player.velocity += final_push_dir
+			apply_push.rpc_id(int(other_player.name), final_push_dir)
+
+@rpc("authority")
+func apply_push(push_vector):
+	velocity += push_vector
+	print("Push received: " + str(push_vector))
 
 func _on_lava_entered(body):
 	if not multiplayer.is_server():
@@ -133,201 +253,11 @@ func player_respawned():
 
 func _on_ping_updated(ping_value):
 	if multiplayer.get_unique_id() == name.to_int():
-		# Only update ping for the local player
 		%PingLabel.text = "Ping: " + str(ping_value) + "ms"
 
-
 func _on_game_state_changed(key, _value):
-	print("Game state changed")
 	if key == "players":
 		if GameManager.game_state.players.has(name):
 			player_name_label.text = GameManager.game_state.players[name].name
 		else:
 			player_name_label.text = "Player " + name
-
-
-func _apply_animations(_delta):
-	if alive == false:
-		return
-	
-	# Get raw input
-	var raw_input = Input.get_vector("left", "right", "up", "down")
-	
-	# Update timers
-	if push_animation_timer > 0:
-		push_animation_timer -= _delta
-	if jump_animation_timer > 0:
-		jump_animation_timer -= _delta
-	if jump_cooldown_timer > 0:
-		jump_cooldown_timer -= _delta
-	
-	# Handle push animation
-	if push_animation_timer > 0:
-		animated_sprite.play("push_" + last_direction)
-		return
-
-	# Handle push input
-	if %InputSynchronizer.input_push and push_animation_timer <= 0:
-		push_animation_timer = PUSH_COOLDOWN_DURATION
-		animated_sprite.play("push_" + last_direction)
-		return
-	
-	# Handle jump animation with cooldown
-	if jump_animation_timer > 0:
-		animated_sprite.play("jump_" + last_direction)
-		return
-	
-	# Start jump animation when button is pressed and cooldown is over
-	if %InputSynchronizer.input_jump and jump_cooldown_timer <= 0:
-		jump_animation_timer = JUMP_ANIMATION_DURATION
-		jump_cooldown_timer = JUMP_COOLDOWN
-		animated_sprite.play("jump_" + last_direction)
-		return
-	
-	# Handle ground movement animations
-	if raw_input.length() > 0.1:
-		# Determine direction based on dominant input axis
-		if abs(raw_input.x) > abs(raw_input.y):
-			last_direction = "right" if raw_input.x > 0 else "left"
-		else:
-			last_direction = "down" if raw_input.y > 0 else "up"
-		
-		# Handle running vs walking
-		if %InputSynchronizer.input_run:
-			animated_sprite.play("run_" + last_direction)
-		else:
-			animated_sprite.play("walk_" + last_direction)
-			animated_sprite.speed_scale = 1.0
-	else:
-		# Player is idle
-		animated_sprite.play("idle_" + last_direction)
-		animated_sprite.speed_scale = 1.0
-
-func _apply_movement_from_input(delta):
-	if not is_on_floor():
-		velocity += get_gravity() * delta
-	
-	# Handle jump with cooldown
-	if %InputSynchronizer.input_jump and is_on_floor() and jump_cooldown_timer <= 0:
-		velocity.y = JUMP_VELOCITY
-		jump_animation_timer = JUMP_ANIMATION_DURATION
-		jump_cooldown_timer = JUMP_COOLDOWN
-	
-	# Update jump cooldown timer
-	if jump_cooldown_timer > 0:
-		jump_cooldown_timer -= delta
-
-	# Handle push with cooldown
-	if %InputSynchronizer.input_push and push_cooldown <= 0:
-		perform_push_attack()
-		push_cooldown = PUSH_COOLDOWN_DURATION
-		push_animation_timer = PUSH_COOLDOWN_DURATION
-
-	if push_cooldown > 0:
-		push_cooldown -= delta
-
-	# Apply movement
-	var input_dir = %InputSynchronizer.input_dir
-	# Convert input to camera-relative direction
-	var player_rotation = rotation.y
-	var direction = Vector3.ZERO
-	
-	# Apply rotation matrix to convert input to world space
-	direction.x = input_dir.x * cos(player_rotation) - input_dir.y * sin(player_rotation)
-	direction.z = input_dir.x * sin(player_rotation) + input_dir.y * cos(player_rotation)
-	direction = direction.normalized()
-	
-	# Apply friction first to prevent excessive speed buildup
-	var friction = FRICTION
-	velocity.x *= (1.0 - friction)
-	velocity.z *= (1.0 - friction)
-
-	# Determine speed based on run input
-	var current_speed = SPEED
-	if %InputSynchronizer.input_run:
-		current_speed *= RUN_SPEED_MULTIPLIER
-	
-	# Add to velocity instead of setting it directly
-	if direction:
-		velocity.x += direction.x * current_speed * delta * 10.0
-		velocity.z += direction.z * current_speed * delta * 10.0
-	
-	# Cap maximum horizontal speed
-	var max_speed = current_speed * 1.2
-	var horizontal_velocity = Vector2(velocity.x, velocity.z)
-	if horizontal_velocity.length() > max_speed:
-		horizontal_velocity = horizontal_velocity.normalized() * max_speed
-		velocity.x = horizontal_velocity.x
-		velocity.z = horizontal_velocity.y
-
-	move_and_slide()
-
-func perform_push_attack():
-	if not multiplayer.is_server():
-		return
-	
-	# Get player's forward direction based on input direction instead of transform
-	var input_dir = %InputSynchronizer.input_dir
-	var forward_direction
-	
-	if input_dir.length() > 0.1:
-		# Use input direction if player is moving
-		forward_direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	else:
-		# Use character's facing direction if not moving
-		forward_direction = -transform.basis.z.normalized()
-	
-	# Find all players in radius
-	var players = get_tree().get_nodes_in_group("players")
-	# print("Push attack: found " + str(players.size()) + " players")
-	
-	for other_player in players:
-		if other_player == self:
-			continue
-		
-		# Calculate vector to other player (ignoring Y for better horizontal detection)
-		var to_other = other_player.global_position - global_position
-		var to_other_flat = Vector3(to_other.x, 0, to_other.z)
-		var distance = to_other_flat.length()
-		
-		# Check if player is within push radius
-		if distance < PUSH_RADIUS:
-			# Normalize the direction vector (for the flat version)
-			# var push_dir_flat = to_other_flat.normalized()
-			
-			# Check if player is roughly in front using flat vectors (ignoring Y)
-			# var angle = forward_direction.dot(push_dir_flat)
-
-			# print("Player " + other_player.name + " at angle: " + str(angle))
-			#
-			# print("Pushing player: " + other_player.name)
-			
-			# Calculate push direction (away from pusher, preserving Y difference)
-			var push_dir = to_other.normalized()
-			var final_push_dir = push_dir * PUSH_FORCE
-			
-			# Add upward component
-			final_push_dir.y = 0
-			
-			# Apply push directly on server
-			other_player.velocity += final_push_dir
-			# Also send RPC to ensure client sees the push
-			apply_push.rpc_id(int(other_player.name), final_push_dir)
-
-@rpc("authority")
-func apply_push(push_vector):
-	# Direct application of push force
-	print("Push received: " + str(push_vector))
-	velocity += push_vector
-	# Ensure the push is visible by adding extra upward force
-	# velocity.y += 0.2
-
-
-func _physics_process(delta):
-	if multiplayer.is_server():
-		_is_on_floor = is_on_floor()
-		if alive:
-			_apply_movement_from_input(delta)
-
-	if not multiplayer.is_server():
-		_apply_animations(delta)
