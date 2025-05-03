@@ -12,6 +12,8 @@ const PUSH_COOLDOWN_DURATION = 0.25
 
 const JUMP_ANIMATION_DURATION = 0.5
 var jump_animation_timer = 0.0
+const JUMP_COOLDOWN = 0.7
+var jump_cooldown_timer = 0.0
 
 const FRICTION = 0.1
 
@@ -95,65 +97,83 @@ var push_animation_timer = 0.0
 func _apply_animations(_delta):
 	if alive == false:
 		return
-
-	if jump_animation_timer > 0:
-		jump_animation_timer -= _delta
-		animated_sprite.play("jump_" + last_direction)
-		return
-
+	
 	var input_dir = %InputSynchronizer.input_dir
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	
+	# Update timers
 	if push_animation_timer > 0:
 		push_animation_timer -= _delta
+	if jump_animation_timer > 0:
+		jump_animation_timer -= _delta
+	if jump_cooldown_timer > 0:
+		jump_cooldown_timer -= _delta
+	
+	# Handle push animation
+	if push_animation_timer > 0:
 		animated_sprite.play("push_" + last_direction)
 		return
 
-	# TODO: Fix the snchronization of applying push on server and animation on client
+	# Handle push input
 	if %InputSynchronizer.input_push:
 		push_animation_timer = PUSH_COOLDOWN_DURATION
 		animated_sprite.play("push_" + last_direction)
 		return
-
-	if %InputSynchronizer.input_jump and jump_animation_timer <= 0:
-		jump_animation_timer = JUMP_ANIMATION_DURATION
+	
+	# Handle jump animation with cooldown
+	if jump_animation_timer > 0:
 		animated_sprite.play("jump_" + last_direction)
 		return
-
+	
+	# Start jump animation when button is pressed and cooldown is over
+	if %InputSynchronizer.input_jump and jump_cooldown_timer <= 0:
+		jump_animation_timer = JUMP_ANIMATION_DURATION
+		jump_cooldown_timer = JUMP_COOLDOWN
+		animated_sprite.play("jump_" + last_direction)
+		return
+	
+	# Handle ground movement animations
 	if direction.length() > 0.1:
-		# Player is moving - update last_direction only if needed
+		# Update last_direction based on movement
 		if abs(direction.x) > 0.1:
-			# Horizontal movement detected
 			last_direction = "right" if direction.x > 0 else "left"
 		elif abs(direction.z) > 0.1:
-			# Vertical movement detected
 			last_direction = "down" if direction.z > 0 else "up"
 		
-		# Check if player is running
+		# Handle running vs walking
 		if %InputSynchronizer.input_run:
-			# Play the walk animation but at faster speed for running
-			animated_sprite.play("run_" + last_direction)
-			# animated_sprite.speed_scale = 1.5  # Increase animation speed for running
+			animated_sprite.play("run_" + last_direction)  # Using run animation if available
+			# Or use walk animation with increased speed if run animations don't exist
+			# animated_sprite.play("walk_" + last_direction)
+			# animated_sprite.speed_scale = 1.5
 		else:
-			# Play normal walk animation
 			animated_sprite.play("walk_" + last_direction)
-			# animated_sprite.speed_scale = 1.0  # Normal animation speed
+			animated_sprite.speed_scale = 1.0
 	else:
-		# Player is idle - play appropriate idle animation
+		# Player is idle
 		animated_sprite.play("idle_" + last_direction)
-		animated_sprite.speed_scale = 1.0  # Reset animation speed
+		animated_sprite.speed_scale = 1.0
 
 func _apply_movement_from_input(delta):
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 	
-	# Handle jump.
-	if %InputSynchronizer.input_jump and is_on_floor():
+	# Handle jump with cooldown
+	if %InputSynchronizer.input_jump and is_on_floor() and jump_cooldown_timer <= 0:
 		velocity.y = JUMP_VELOCITY
+		jump_animation_timer = JUMP_ANIMATION_DURATION
+		jump_cooldown_timer = JUMP_COOLDOWN
+	
+	# Update jump cooldown timer
+	if jump_cooldown_timer > 0:
+		jump_cooldown_timer -= delta
 
+	# Handle push with cooldown
 	if %InputSynchronizer.input_push and push_cooldown <= 0:
 		print("push")
 		perform_push_attack()
 		push_cooldown = PUSH_COOLDOWN_DURATION
+		push_animation_timer = PUSH_COOLDOWN_DURATION
 
 	if push_cooldown > 0:
 		push_cooldown -= delta
