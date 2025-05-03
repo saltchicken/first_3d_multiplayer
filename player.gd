@@ -18,7 +18,7 @@ var jump_animation_timer = 0.0
 const JUMP_COOLDOWN = 0.7
 var jump_cooldown_timer = 0.0
 
-const FRICTION = 0.1
+const FRICTION = 0.2
 
 var last_direction = "down"
 
@@ -229,12 +229,13 @@ func _apply_movement_from_input(delta):
 	# Apply movement
 	var input_dir = %InputSynchronizer.input_dir
 	# Convert input to camera-relative direction
-	var cam_basis = transform.basis
+	var player_rotation = rotation.y
 	var direction = Vector3.ZERO
-	direction = (cam_basis.x * input_dir.x + cam_basis.z * input_dir.y).normalized()
-
-	# print(direction)
-	# var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	
+	# Apply rotation matrix to convert input to world space
+	direction.x = input_dir.x * cos(player_rotation) - input_dir.y * sin(player_rotation)
+	direction.z = input_dir.x * sin(player_rotation) + input_dir.y * cos(player_rotation)
+	direction = direction.normalized()
 	
 	# Apply friction first to prevent excessive speed buildup
 	var friction = FRICTION
