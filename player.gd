@@ -11,6 +11,8 @@ var push_cooldown = 0.0
 var push_animation_timer = 0.0
 const PUSH_COOLDOWN_DURATION = 0.5
 
+#TODO: Should not need animation timer and cooldown. Animation timer is working on client. Cooldown is working on server with physics
+
 const JUMP_ANIMATION_DURATION = 0.5
 var jump_animation_timer = 0.0
 const JUMP_COOLDOWN = 0.7
