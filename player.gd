@@ -25,6 +25,8 @@ var last_camera_facing_rotation = 0.0
 var current_animation_base = "idle" # Base animation without direction
 var animation_speed = 1.0
 
+var synced_last_direction = "down"
+
 @onready var animated_sprite = $"AnimatedSprite3D"
 @onready var player_name_label = %PlayerNameLabel
 @onready var camera_pivot = $CameraPivot
@@ -59,7 +61,9 @@ func _physics_process(delta):
 	# Client-side direction determination
 	if multiplayer.get_unique_id() == name.to_int():
 		_determine_animation_direction()
-	
+	else:
+		# For other players, determine direction based on their movement
+		last_direction = synced_last_direction
 	# Apply server-determined animation with client-determined direction
 	var full_animation = current_animation_base
 	if current_animation_base != "death":
@@ -117,6 +121,30 @@ func _determine_animation_direction():
 		# 	last_direction = "right" if player_forward.x > 0 else "left"
 		# else:
 		# 	last_direction = "up" if player_forward.z > 0 else "down"
+		#
+
+func _determine_other_player_direction():
+	# Get the player's velocity
+	var player_velocity = Vector3(velocity.x, 0, velocity.z)
+	
+	# If the player is moving
+	if player_velocity.length() > 0.1:
+		# Determine direction based on velocity
+		if abs(player_velocity.x) > abs(player_velocity.z):
+			last_direction = "right" if player_velocity.x > 0 else "left"
+		else:
+			last_direction = "down" if player_velocity.z > 0 else "up"
+	else:
+		# When not moving, use the player's rotation
+		var player_forward = -global_transform.basis.z
+		player_forward.y = 0  # Project onto horizontal plane
+		player_forward = player_forward.normalized()
+		
+		# Determine direction based on the largest component
+		if abs(player_forward.x) > abs(player_forward.z):
+			last_direction = "right" if player_forward.x > 0 else "left"
+		else:
+			last_direction = "down" if player_forward.z > 0 else "up"
 
 func _apply_movement_from_input(delta):
 	# Apply gravity
@@ -158,6 +186,7 @@ func _apply_movement_from_input(delta):
 			last_direction = "right" if input_dir.x > 0 else "left"
 		else:
 			last_direction = "down" if input_dir.y > 0 else "up"
+		synced_last_direction = last_direction
 	
 	# Apply friction
 	velocity.x *= (1.0 - FRICTION)
