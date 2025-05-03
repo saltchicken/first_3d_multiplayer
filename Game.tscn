@@ -59,6 +59,8 @@ sky_material = SubResource("ShaderMaterial_r0x5m")
 background_mode = 2
 background_color = Color(0, 0, 0.819608, 1)
 sky = SubResource("Sky_3mrqo")
+ambient_light_source = 1
+reflected_light_source = 1
 
 [node name="Game" type="Node3D"]
 script = ExtResource("1_wbfu4")
