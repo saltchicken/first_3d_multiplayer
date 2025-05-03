@@ -21,6 +21,8 @@ var last_direction = "down"
 var _is_on_floor = true
 var alive = true
 
+var last_camera_facing_rotation = 0.0
+
 @onready var animated_sprite = $"AnimatedSprite3D"
 @onready var player_name_label = %PlayerNameLabel
 @onready var camera_pivot = $CameraPivot
@@ -54,6 +56,15 @@ func _physics_process(delta):
 	
 	if not multiplayer.is_server():
 		_apply_animations(delta)
+
+		# TODO: Add this to _apply_animations
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+			if %InputSynchronizer.input_dir.length() < 0.1:
+				# Make sprite face the camera when not moving
+				animated_sprite.rotation.y = -global_rotation.y - last_camera_facing_rotation
+			else:
+				animated_sprite.rotation.y = 0
+				last_camera_facing_rotation = -global_rotation.y
 
 func _apply_movement_from_input(delta):
 	# Apply gravity
