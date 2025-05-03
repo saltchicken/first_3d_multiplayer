@@ -47,7 +47,6 @@ func _ready():
 func _on_lava_entered(body):
 	if not multiplayer.is_server():
 		return
-	print("Lava entered")
 	if body == self:
 		alive = false
 		player_died.rpc()
@@ -172,7 +171,6 @@ func _apply_movement_from_input(delta):
 
 	# Handle push with cooldown
 	if %InputSynchronizer.input_push and push_cooldown <= 0:
-		print("push")
 		perform_push_attack()
 		push_cooldown = PUSH_COOLDOWN_DURATION
 		push_animation_timer = PUSH_COOLDOWN_DURATION
@@ -226,7 +224,7 @@ func perform_push_attack():
 	
 	# Find all players in radius
 	var players = get_tree().get_nodes_in_group("players")
-	print("Push attack: found " + str(players.size()) + " players")
+	# print("Push attack: found " + str(players.size()) + " players")
 	
 	for other_player in players:
 		if other_player == self:
@@ -240,13 +238,14 @@ func perform_push_attack():
 		# Check if player is within push radius
 		if distance < PUSH_RADIUS:
 			# Normalize the direction vector (for the flat version)
-			var push_dir_flat = to_other_flat.normalized()
+			# var push_dir_flat = to_other_flat.normalized()
 			
 			# Check if player is roughly in front using flat vectors (ignoring Y)
-			var angle = forward_direction.dot(push_dir_flat)
-			print("Player " + other_player.name + " at angle: " + str(angle))
-			
-			print("Pushing player: " + other_player.name)
+			# var angle = forward_direction.dot(push_dir_flat)
+
+			# print("Player " + other_player.name + " at angle: " + str(angle))
+			#
+			# print("Pushing player: " + other_player.name)
 			
 			# Calculate push direction (away from pusher, preserving Y difference)
 			var push_dir = to_other.normalized()
