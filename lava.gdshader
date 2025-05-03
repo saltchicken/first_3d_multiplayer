@@ -20,7 +20,7 @@ void fragment() {
     // Get view direction in tangent space for parallax
     vec3 view_dir = normalize(INV_VIEW_MATRIX * vec4(VIEW, 0.0)).xyz;
     vec2 parallax_offset = view_dir.xy * parallax_scale * parallax_depth;
-    
+
     // Create distortion effect for more chaotic flow
     vec2 distortion_uv = (UV + parallax_offset) * noise_scale;
     distortion_uv.x -= TIME * secondary_flow_speed * 0.2;
