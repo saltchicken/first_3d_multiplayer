@@ -29,6 +29,9 @@ func _physics_process(_delta):
 		
 		# Combine them based on input
 		input_dir = right * raw_input.x + forward * raw_input.y
+
+		if input_dir.length() > 1.0:
+			input_dir = input_dir.normalized()
 	else:
 		input_dir = Vector2.ZERO
 	print(input_dir)
