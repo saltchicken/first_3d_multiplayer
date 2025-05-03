@@ -22,6 +22,8 @@ var _is_on_floor = true
 var alive = true
 
 var last_camera_facing_rotation = 0.0
+var current_animation = "idle_down"
+var animation_speed = 1.0
 
 @onready var animated_sprite = $"AnimatedSprite3D"
 @onready var player_name_label = %PlayerNameLabel
@@ -54,10 +56,12 @@ func _physics_process(delta):
 		if alive:
 			_apply_movement_from_input(delta)
 	
-	if not multiplayer.is_server():
-		_apply_animations(delta)
-
-		# TODO: Add this to _apply_animations
+	# Apply server-determined animations
+	animated_sprite.play(current_animation)
+	animated_sprite.speed_scale = animation_speed
+	
+	# Only handle camera-relative sprite rotation on client
+	if multiplayer.get_unique_id() == name.to_int():
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 			if %InputSynchronizer.input_dir.length() < 0.1:
 				# Make sprite face the camera when not moving
@@ -130,62 +134,35 @@ func _apply_movement_from_input(delta):
 	# Apply movement
 	move_and_slide()
 
-func _apply_animations(delta):
+	# Set animation state based on server-side logic
 	if not alive:
+		current_animation = "death"
+		animation_speed = 1.0
 		return
-	
-	# Get raw input for animation determination
-	var raw_input = Input.get_vector("left", "right", "up", "down")
-	var input_jump = %InputSynchronizer.input_jump
-	var input_push = %InputSynchronizer.input_push
-	var input_run = %InputSynchronizer.input_run
-	
-	# Update animation timers
-	if push_animation_timer > 0:
-		push_animation_timer -= delta
-	if jump_animation_timer > 0:
-		jump_animation_timer -= delta
-	if jump_cooldown_timer > 0:
-		jump_cooldown_timer -= delta
-	
-	# Handle push animation priority
-	if push_animation_timer > 0:
-		animated_sprite.play("push_" + last_direction)
-		return
-	
-	# Start push animation
-	if input_push and push_animation_timer <= 0:
-		push_animation_timer = PUSH_COOLDOWN_DURATION
-		animated_sprite.play("push_" + last_direction)
-		return
-	
-	# Handle jump animation priority
-	if jump_animation_timer > 0:
-		animated_sprite.play("jump_" + last_direction)
-		return
-	
-	# Start jump animation
-	if input_jump and is_on_floor() and jump_cooldown_timer <= 0:
-		jump_animation_timer = JUMP_ANIMATION_DURATION
-		jump_cooldown_timer = JUMP_COOLDOWN
-		animated_sprite.play("jump_" + last_direction)
-		return
-	
-	# Determine facing direction based on input
-	if raw_input.length() > 0.1:
-		if abs(raw_input.x) > abs(raw_input.y):
-			last_direction = "right" if raw_input.x > 0 else "left"
-		else:
-			last_direction = "down" if raw_input.y > 0 else "up"
 		
+	# Handle push animation
+	if input_push and push_cooldown <= 0:
+		current_animation = "push_" + last_direction
+		animation_speed = 1.0
+		return
+		
+	# Handle jump animation
+	if input_jump and is_on_floor() and jump_cooldown_timer <= 0:
+		current_animation = "jump_" + last_direction
+		animation_speed = 1.0
+		return
+		
+	# Handle movement animations
+	if input_dir.length() > 0.1:
 		if input_run:
-			animated_sprite.play("run_" + last_direction)
+			current_animation = "run_" + last_direction
+			animation_speed = 1.0
 		else:
-			animated_sprite.play("walk_" + last_direction)
-			animated_sprite.speed_scale = 1.0
+			current_animation = "walk_" + last_direction
+			animation_speed = 1.0
 	else:
-		animated_sprite.play("idle_" + last_direction)
-		animated_sprite.speed_scale = 1.0
+		current_animation = "idle_" + last_direction
+		animation_speed = 1.0
 
 func perform_push_attack():
 	if not multiplayer.is_server():
