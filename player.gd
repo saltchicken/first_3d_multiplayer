@@ -44,7 +44,7 @@ func _on_lava_entered(body):
 		alive = false
 		player_died.rpc()
 		await get_tree().create_timer(3.0).timeout
-		global_position = Vector3(0, 3, 0)  # Respawn position
+		global_position = Vector3(0, 3, 0)	# Respawn position
 		alive = true
 		player_respawned.rpc()
 
@@ -114,11 +114,19 @@ func _apply_animations(_delta):
 			# Vertical movement detected
 			last_direction = "down" if direction.z > 0 else "up"
 		
-		# Play the walk animation for the current direction
-		animated_sprite.play("walk_" + last_direction)
+		# Check if player is running
+		if %InputSynchronizer.input_run:
+			# Play the walk animation but at faster speed for running
+			animated_sprite.play("run_" + last_direction)
+			# animated_sprite.speed_scale = 1.5  # Increase animation speed for running
+		else:
+			# Play normal walk animation
+			animated_sprite.play("walk_" + last_direction)
+			# animated_sprite.speed_scale = 1.0  # Normal animation speed
 	else:
 		# Player is idle - play appropriate idle animation
 		animated_sprite.play("idle_" + last_direction)
+		animated_sprite.speed_scale = 1.0  # Reset animation speed
 
 func _apply_movement_from_input(delta):
 	if not is_on_floor():
