@@ -676,11 +676,18 @@ script = ExtResource("3_i3pqv")
 unique_name_in_owner = true
 visible = false
 
-[node name="Button" type="Button" parent="PauseMenu"]
-offset_left = 539.0
-offset_top = 289.0
-offset_right = 765.0
-offset_bottom = 370.0
+[node name="HBoxContainer" type="HBoxContainer" parent="PauseMenu"]
+offset_right = 1152.0
+offset_bottom = 648.0
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenu/HBoxContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+alignment = 1
+
+[node name="Button" type="Button" parent="PauseMenu/HBoxContainer/VBoxContainer"]
+layout_mode = 2
 text = "Exit"
 
 [node name="PlayerNameLabel" type="Label3D" parent="."]
@@ -694,4 +701,4 @@ unique_name_in_owner = true
 offset_right = 40.0
 offset_bottom = 23.0
 
-[connection signal="pressed" from="PauseMenu/Button" to="InputSynchronizer" method="leave_game"]
+[connection signal="pressed" from="PauseMenu/HBoxContainer/VBoxContainer/Button" to="InputSynchronizer" method="leave_game"]
