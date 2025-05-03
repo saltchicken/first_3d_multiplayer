@@ -21,7 +21,7 @@ func _physics_process(_delta):
 	input_dir = Input.get_vector("left", "right", "up", "down")
 	input_run = Input.is_action_pressed("run")
 	input_jump = Input.get_action_strength("jump")
-	input_push = Input.is_action_just_pressed("push")
+	input_push = Input.get_action_strength("push")
 	if Input.is_action_just_pressed("pause"):
 		toggle_pause()
 
