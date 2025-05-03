@@ -10,6 +10,9 @@ const PUSH_RADIUS = 2.0
 var push_cooldown = 0.0
 const PUSH_COOLDOWN_DURATION = 0.25
 
+const JUMP_ANIMATION_DURATION = 0.5
+var jump_animation_timer = 0.0
+
 const FRICTION = 0.1
 
 var last_direction = "down"
@@ -92,6 +95,12 @@ var push_animation_timer = 0.0
 func _apply_animations(_delta):
 	if alive == false:
 		return
+
+	if jump_animation_timer > 0:
+		jump_animation_timer -= _delta
+		animated_sprite.play("jump_" + last_direction)
+		return
+
 	var input_dir = %InputSynchronizer.input_dir
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	if push_animation_timer > 0:
@@ -103,6 +112,11 @@ func _apply_animations(_delta):
 	if %InputSynchronizer.input_push:
 		push_animation_timer = PUSH_COOLDOWN_DURATION
 		animated_sprite.play("push_" + last_direction)
+		return
+
+	if %InputSynchronizer.input_jump and jump_animation_timer <= 0:
+		jump_animation_timer = JUMP_ANIMATION_DURATION
+		animated_sprite.play("jump_" + last_direction)
 		return
 
 	if direction.length() > 0.1:
