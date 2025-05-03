@@ -9,7 +9,7 @@ const PUSH_FORCE = 200.0
 const PUSH_RADIUS = 2.0
 var push_cooldown = 0.0
 var push_animation_timer = 0.0
-const PUSH_COOLDOWN_DURATION = 0.5
+const PUSH_COOLDOWN_DURATION = 0.1
 
 #TODO: Should not need animation timer and cooldown. Animation timer is working on client. Cooldown is working on server with physics
 
