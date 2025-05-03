@@ -23,7 +23,12 @@ const FRICTION = 0.1
 var last_direction = "down"
 
 const MOUSE_SENSITIVITY = 0.002
-const MAX_CAMERA_ROTATION = 1.0  # In radians (about 60 degrees)
+const MIN_CAMERA_ROTATION = -0.6  # Looking up limit
+const MAX_CAMERA_ROTATION = 0.9   # Looking down limit
+
+# Camera distance variables
+const DEFAULT_CAMERA_DISTANCE = 0.5  # Default distance from pivot
+const MIN_CAMERA_DISTANCE = 0.2		 # Closest distance when looking down
 
 # var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
@@ -61,19 +66,38 @@ func _unhandled_input(event):
 	if multiplayer.get_unique_id() != name.to_int():
 		return
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		# Rotate camera pivot horizontally (around Y axis)
+		# Rotate player horizontally (around Y axis)
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		
-		# Rotate camera vertically (around X axis)
+		# Rotate camera vertically with proper clamping
 		var current_rotation = camera_pivot.rotation.x
-		var new_rotation = clamp(current_rotation - event.relative.y * MOUSE_SENSITIVITY,-MAX_CAMERA_ROTATION, MAX_CAMERA_ROTATION)
+		var new_rotation = clamp(current_rotation - event.relative.y * MOUSE_SENSITIVITY, 
+								MIN_CAMERA_ROTATION, MAX_CAMERA_ROTATION)
 		camera_pivot.rotation.x = new_rotation
+		
+		# Adjust camera distance based on rotation
+		_adjust_camera_distance(new_rotation)
 
-	if event.is_action_pressed("ui_cancel"):
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+# Add this new function to adjust camera distance
+func _adjust_camera_distance(rotation_angle):
+	# Calculate how far down we're looking (0 to 1 range)
+	var look_down_factor = (rotation_angle - MIN_CAMERA_ROTATION) / (MAX_CAMERA_ROTATION - MIN_CAMERA_ROTATION)
+	look_down_factor = clamp(look_down_factor, 0.0, 1.0)
+	
+	# Only adjust distance when looking below horizontal (positive rotation)
+	if rotation_angle > -30:
+		# Calculate new distance (closer when looking down)
+		var new_distance = lerp(DEFAULT_CAMERA_DISTANCE, MIN_CAMERA_DISTANCE, look_down_factor)
+		
+		# Apply new distance to camera's z position
+		var camera_transform = camera.transform
+		camera_transform.origin.z = new_distance
+		camera.transform = camera_transform
+	else:
+		# Reset to default distance when looking up
+		var camera_transform = camera.transform
+		camera_transform.origin.z = DEFAULT_CAMERA_DISTANCE
+		camera.transform = camera_transform
 
 func _on_lava_entered(body):
 	if not multiplayer.is_server():

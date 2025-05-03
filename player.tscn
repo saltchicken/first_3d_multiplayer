@@ -703,6 +703,6 @@ unique_name_in_owner = true
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot"]
 unique_name_in_owner = true
-transform = Transform3D(0.2, 0, 0, 0, 0.191152, 0.0588281, 0, -0.0588281, 0.191152, 0, 0.247901, 0.633846)
+transform = Transform3D(0.2, 0, 0, 0, 0.191152, 0.0588281, 0, -0.0588281, 0.191152, 0, 0.186688, 0.490925)
 
 [connection signal="pressed" from="PauseMenu/HBoxContainer/VBoxContainer/Button" to="InputSynchronizer" method="leave_game"]
