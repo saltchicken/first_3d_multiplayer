@@ -175,17 +175,16 @@ func perform_push_attack():
 	if not multiplayer.is_server():
 		return
 	
+	# Get synchronized input from client
 	var input_dir = %InputSynchronizer.input_dir
-	var forward_direction
+	var forward_direction = Vector3.ZERO
 	
 	if input_dir.length() > 0.1:
-		var cam_rotation = %InputSynchronizer.input_rot.y
-		forward_direction = Vector3(
-			input_dir.x * cos(cam_rotation) - input_dir.y * sin(cam_rotation),
-			0,
-			input_dir.x * sin(cam_rotation) + input_dir.y * cos(cam_rotation)
-		).normalized()
+		# Use the input direction directly to determine push direction
+		# Convert 2D input to 3D direction
+		forward_direction = Vector3(input_dir.x, 0, input_dir.y).normalized()
 	else:
+		# If no input direction, use the character's last known direction
 		var direction_map = {
 			"up": Vector3(0, 0, -1),
 			"down": Vector3(0, 0, 1),
@@ -194,22 +193,29 @@ func perform_push_attack():
 		}
 		forward_direction = direction_map[last_direction]
 	
+	# Find players in radius
+	print(forward_direction)
 	var players = get_tree().get_nodes_in_group("players")
 	
 	for other_player in players:
 		if other_player == self:
 			continue
 		
+		# Calculate vector to other player (ignoring Y)
 		var to_other = other_player.global_position - global_position
 		var to_other_flat = Vector3(to_other.x, 0, to_other.z)
 		var distance = to_other_flat.length()
 		
+		# Check if player is within push radius
 		if distance < PUSH_RADIUS:
+			# Calculate push direction (away from pusher)
 			var push_dir = to_other.normalized()
 			var final_push_dir = push_dir * PUSH_FORCE
 			final_push_dir.y = 0
 			
+			# Apply push on server
 			other_player.velocity += final_push_dir
+			# Send RPC to client
 			apply_push.rpc_id(int(other_player.name), final_push_dir)
 
 @rpc("authority")
