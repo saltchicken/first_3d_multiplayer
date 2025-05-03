@@ -36,10 +36,13 @@ func toggle_pause():
 	if is_paused:
 		# Show pause menu
 		pause_menu.visible = true
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		# Optional: pause game for this player only
 		# get_tree().paused = true
 	else:
 		pause_menu.visible = false
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		# Optional: unpause game for this player only
 		# get_tree().paused = false
 	
 	print("Pause toggled: " + str(is_paused))

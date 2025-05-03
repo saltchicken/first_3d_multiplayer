@@ -22,6 +22,9 @@ const FRICTION = 0.1
 
 var last_direction = "down"
 
+const MOUSE_SENSITIVITY = 0.002
+const MAX_CAMERA_ROTATION = 1.0  # In radians (about 60 degrees)
+
 # var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 var _is_on_floor = true
@@ -29,6 +32,9 @@ var alive = true
 
 @onready var animated_sprite = $"AnimatedSprite3D"
 @onready var player_name_label = %PlayerNameLabel
+
+@onready var camera_pivot = $CameraPivot
+@onready var camera = $CameraPivot/Camera3D
 
 func _enter_tree():
 	%InputSynchronizer.set_multiplayer_authority(name.to_int())
@@ -38,17 +44,37 @@ func _ready():
 	GameManager.game_state_changed.connect(_on_game_state_changed)
 	PingManager.ping_updated.connect(_on_ping_updated)
 	if multiplayer.get_unique_id() == name.to_int():
-		print("working")
-		$Camera3D.make_current()
+		print("Set up player for client side")
+		camera.make_current()
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	else:
-		print("not working")
-		$Camera3D.enabled = false
+		print("Player init on instance that is not client")
+		camera.enabled = false
 
 	if multiplayer.is_server():
 		# Find all lava areas in the scene
 		var lava_areas = get_tree().get_nodes_in_group("lava")
 		for lava in lava_areas:
 			lava.body_entered.connect(_on_lava_entered)
+
+func _unhandled_input(event):
+	if multiplayer.get_unique_id() != name.to_int():
+		return
+	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+		# Rotate camera pivot horizontally (around Y axis)
+		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
+		
+		# Rotate camera vertically (around X axis)
+		var current_rotation = camera_pivot.rotation.x
+		var new_rotation = clamp(current_rotation + event.relative.y * MOUSE_SENSITIVITY, 
+								-MAX_CAMERA_ROTATION, MAX_CAMERA_ROTATION)
+		camera_pivot.rotation.x = new_rotation
+
+	if event.is_action_pressed("ui_cancel"):
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 func _on_lava_entered(body):
 	if not multiplayer.is_server():
@@ -182,7 +208,12 @@ func _apply_movement_from_input(delta):
 
 	# Apply movement
 	var input_dir = %InputSynchronizer.input_dir
-	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	# Convert input to camera-relative direction
+	var cam_basis = transform.basis
+	var direction = Vector3.ZERO
+	direction = (cam_basis.x * input_dir.x + cam_basis.z * input_dir.y).normalized()
+
+	# var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	# Apply friction first to prevent excessive speed buildup
 	var friction = FRICTION
