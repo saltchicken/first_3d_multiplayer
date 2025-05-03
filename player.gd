@@ -54,7 +54,7 @@ func _ready():
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	else:
 		print("Player init on instance that is not client")
-		camera.enabled = false
+		# camera.enabled = false
 
 	if multiplayer.is_server():
 		# Find all lava areas in the scene
