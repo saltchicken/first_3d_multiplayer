@@ -66,8 +66,7 @@ func _unhandled_input(event):
 		
 		# Rotate camera vertically (around X axis)
 		var current_rotation = camera_pivot.rotation.x
-		var new_rotation = clamp(current_rotation + event.relative.y * MOUSE_SENSITIVITY, 
-								-MAX_CAMERA_ROTATION, MAX_CAMERA_ROTATION)
+		var new_rotation = clamp(current_rotation - event.relative.y * MOUSE_SENSITIVITY,-MAX_CAMERA_ROTATION, MAX_CAMERA_ROTATION)
 		camera_pivot.rotation.x = new_rotation
 
 	if event.is_action_pressed("ui_cancel"):
