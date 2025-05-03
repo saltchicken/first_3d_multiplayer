@@ -150,8 +150,8 @@ func _apply_animations(_delta):
 	if alive == false:
 		return
 	
-	var input_dir = %InputSynchronizer.input_dir
-	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	# Get raw input
+	var raw_input = Input.get_vector("left", "right", "up", "down")
 	
 	# Update timers
 	if push_animation_timer > 0:
@@ -185,19 +185,16 @@ func _apply_animations(_delta):
 		return
 	
 	# Handle ground movement animations
-	if direction.length() > 0.1:
-		# Update last_direction based on movement
-		if abs(direction.x) > 0.1:
-			last_direction = "right" if direction.x > 0 else "left"
-		elif abs(direction.z) > 0.1:
-			last_direction = "down" if direction.z > 0 else "up"
+	if raw_input.length() > 0.1:
+		# Determine direction based on dominant input axis
+		if abs(raw_input.x) > abs(raw_input.y):
+			last_direction = "right" if raw_input.x > 0 else "left"
+		else:
+			last_direction = "down" if raw_input.y > 0 else "up"
 		
 		# Handle running vs walking
 		if %InputSynchronizer.input_run:
-			animated_sprite.play("run_" + last_direction)  # Using run animation if available
-			# Or use walk animation with increased speed if run animations don't exist
-			# animated_sprite.play("walk_" + last_direction)
-			# animated_sprite.speed_scale = 1.5
+			animated_sprite.play("run_" + last_direction)
 		else:
 			animated_sprite.play("walk_" + last_direction)
 			animated_sprite.speed_scale = 1.0
@@ -236,6 +233,7 @@ func _apply_movement_from_input(delta):
 	var direction = Vector3.ZERO
 	direction = (cam_basis.x * input_dir.x + cam_basis.z * input_dir.y).normalized()
 
+	# print(direction)
 	# var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	# Apply friction first to prevent excessive speed buildup

@@ -34,7 +34,6 @@ func _physics_process(_delta):
 			input_dir = input_dir.normalized()
 	else:
 		input_dir = Vector2.ZERO
-	print(input_dir)
 	input_run = Input.is_action_pressed("run")
 	input_jump = Input.get_action_strength("jump")
 	input_push = Input.get_action_strength("push")
