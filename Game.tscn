@@ -1,8 +1,9 @@
-[gd_scene load_steps=14 format=3 uid="uid://bs7mo7ss2w0ft"]
+[gd_scene load_steps=17 format=3 uid="uid://bs7mo7ss2w0ft"]
 
 [ext_resource type="Script" uid="uid://bpwa18bghyk3n" path="res://game.gd" id="1_wbfu4"]
 [ext_resource type="Texture2D" uid="uid://d25ror1qy41nu" path="res://assets_task_01jt9b9tjhfcjvrkbemkz2fbdm_1746218082_img_0.webp" id="2_xkndl"]
 [ext_resource type="Shader" uid="uid://cy763jju4mgnt" path="res://lava.gdshader" id="3_u44n3"]
+[ext_resource type="Shader" uid="uid://dwodtjlo8xjot" path="res://sky.gdshader" id="4_sb48q"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_ilcil"]
 size = Vector3(10, 0.5, 10)
@@ -45,9 +46,19 @@ size = Vector3(20.1236, 0.457642, 10)
 [sub_resource type="BoxShape3D" id="BoxShape3D_u44n3"]
 size = Vector3(20.4813, 0.489922, 10.3615)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_r0x5m"]
+shader = ExtResource("4_sb48q")
+shader_parameter/sky_top_color = Color(0.1, 0.3, 0.8, 1)
+shader_parameter/sky_horizon_color = Color(0.6, 0.7, 0.9, 1)
+shader_parameter/horizon_blend = 0.1
+
+[sub_resource type="Sky" id="Sky_3mrqo"]
+sky_material = SubResource("ShaderMaterial_r0x5m")
+
 [sub_resource type="Environment" id="Environment_t88pq"]
-background_mode = 1
+background_mode = 2
 background_color = Color(0, 0, 0.819608, 1)
+sky = SubResource("Sky_3mrqo")
 
 [node name="Game" type="Node3D"]
 script = ExtResource("1_wbfu4")
