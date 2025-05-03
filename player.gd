@@ -8,7 +8,8 @@ const JUMP_VELOCITY = 2.5
 const PUSH_FORCE = 200.0
 const PUSH_RADIUS = 2.0
 var push_cooldown = 0.0
-const PUSH_COOLDOWN_DURATION = 0.3
+var push_animation_timer = 0.0
+const PUSH_COOLDOWN_DURATION = 0.5
 
 const JUMP_ANIMATION_DURATION = 0.5
 var jump_animation_timer = 0.0
@@ -92,6 +93,7 @@ func _on_game_state_changed(key, _value):
 		else:
 			player_name_label.text = "Player " + name
 
+
 func _apply_animations(_delta):
 	if alive == false:
 		return
@@ -100,23 +102,21 @@ func _apply_animations(_delta):
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	# Update timers
-	# if push_animation_timer > 0:
-	# 	push_animation_timer -= _delta
+	if push_animation_timer > 0:
+		push_animation_timer -= _delta
 	if jump_animation_timer > 0:
 		jump_animation_timer -= _delta
 	if jump_cooldown_timer > 0:
 		jump_cooldown_timer -= _delta
-	if push_cooldown > 0:
-		push_cooldown -= _delta
 	
 	# Handle push animation
-	if push_cooldown > 0:
+	if push_animation_timer > 0:
 		animated_sprite.play("push_" + last_direction)
 		return
 
 	# Handle push input
-	if %InputSynchronizer.input_push and push_cooldown <= 0:
-		push_cooldown = PUSH_COOLDOWN_DURATION
+	if %InputSynchronizer.input_push and push_animation_timer <= 0:
+		push_animation_timer = PUSH_COOLDOWN_DURATION
 		animated_sprite.play("push_" + last_direction)
 		return
 	
@@ -173,6 +173,7 @@ func _apply_movement_from_input(delta):
 		print("push")
 		perform_push_attack()
 		push_cooldown = PUSH_COOLDOWN_DURATION
+		push_animation_timer = PUSH_COOLDOWN_DURATION
 
 	if push_cooldown > 0:
 		push_cooldown -= delta
