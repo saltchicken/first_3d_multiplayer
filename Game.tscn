@@ -30,16 +30,16 @@ shader_parameter/noise_texture2 = SubResource("NoiseTexture2D_u44n3")
 shader_parameter/lava_color1 = Color(1, 0.2, 0, 1)
 shader_parameter/lava_color2 = Color(1, 0.8, 0, 1)
 shader_parameter/lava_color3 = Color(0.8, 0.1, 0, 1)
-shader_parameter/flow_speed = 0.1
-shader_parameter/secondary_flow_speed = 0.1
+shader_parameter/flow_speed = 0.445
+shader_parameter/secondary_flow_speed = 0.392
 shader_parameter/noise_scale = 1.0
-shader_parameter/distortion_strength = 0.136
-shader_parameter/emission_strength = 1.0
+shader_parameter/distortion_strength = 0.236
+shader_parameter/emission_strength = 1.04
 shader_parameter/bubble_speed = 0.8
 shader_parameter/bubble_threshold = 0.75
 shader_parameter/bubble_size = 0.05
-shader_parameter/parallax_scale = 0.484
-shader_parameter/parallax_depth = 0.0
+shader_parameter/parallax_scale = 0.892
+shader_parameter/parallax_depth = 0.089
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3hls8"]
 size = Vector3(20.1236, 0.457642, 10)
