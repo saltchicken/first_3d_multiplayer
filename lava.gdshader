@@ -13,23 +13,29 @@ uniform float emission_strength : hint_range(1.0, 15.0) = 5.0;
 uniform float bubble_speed : hint_range(0.1, 3.0) = 0.8;
 uniform float bubble_threshold : hint_range(0.5, 0.95) = 0.75;
 uniform float bubble_size : hint_range(0.01, 0.2) = 0.05;
+uniform float parallax_scale : hint_range(0.0, 1.0) = 0.1;
+uniform float parallax_depth : hint_range(0.0, 10.0) = 2.0;
 
 void fragment() {
+    // Get view direction in tangent space for parallax
+    vec3 view_dir = normalize(INV_VIEW_MATRIX * vec4(VIEW, 0.0)).xyz;
+    vec2 parallax_offset = view_dir.xy * parallax_scale * parallax_depth;
+    
     // Create distortion effect for more chaotic flow
-    vec2 distortion_uv = UV * noise_scale;
+    vec2 distortion_uv = (UV + parallax_offset) * noise_scale;
     distortion_uv.x -= TIME * secondary_flow_speed * 0.2;
     float distortion = texture(noise_texture2, distortion_uv).r * 2.0 - 1.0;
 
-    // Apply distortion to main UV
-    vec2 uv = UV;
+    // Apply distortion and parallax to main UV
+    vec2 uv = UV + parallax_offset;
     uv.y -= TIME * flow_speed * 0.1;
     uv.x += distortion * distortion_strength;
 
     // Sample main noise for lava pattern
     float noise = texture(noise_texture, uv).r;
 
-    // Create bubbling effect
-    vec2 bubble_uv = UV * 3.0;
+    // Create bubbling effect with parallax
+    vec2 bubble_uv = (UV + parallax_offset * 1.5) * 3.0;
     bubble_uv.y -= TIME * bubble_speed;
     float bubble_noise = texture(noise_texture, bubble_uv).r;
     float bubbles = step(bubble_threshold, bubble_noise) * step(distance(fract(bubble_uv * 2.0), vec2(0.5)), bubble_size);
