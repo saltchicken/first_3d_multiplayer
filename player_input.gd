@@ -13,7 +13,6 @@ const DEFAULT_CAMERA_DISTANCE = 0.5  # Default distance from pivot
 const MIN_CAMERA_DISTANCE = 0.2     # Closest distance when looking down
 
 var input_dir
-var input_rot
 var input_jump
 var input_push = false
 var input_run = false
