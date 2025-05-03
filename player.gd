@@ -62,7 +62,6 @@ func _apply_movement_from_input(delta):
 	
 	# Get synchronized input from client
 	var input_dir = %InputSynchronizer.input_dir
-	var input_rot = %InputSynchronizer.input_rot
 	var input_jump = %InputSynchronizer.input_jump
 	var input_push = %InputSynchronizer.input_push
 	var input_run = %InputSynchronizer.input_run
@@ -87,9 +86,8 @@ func _apply_movement_from_input(delta):
 	var direction = Vector3.ZERO
 	if input_dir.length() > 0.1:
 		# Convert 2D input to 3D direction using client's camera rotation
-		var cam_rotation = input_rot.y
-		direction.x = input_dir.x * cos(cam_rotation) - input_dir.y * sin(cam_rotation)
-		direction.z = input_dir.x * sin(cam_rotation) + input_dir.y * cos(cam_rotation)
+		direction.x = input_dir.x
+		direction.z = input_dir.y
 		direction = direction.normalized()
 	
 	# Apply friction
