@@ -37,6 +37,12 @@ func _ready():
 	add_to_group("players")
 	GameManager.game_state_changed.connect(_on_game_state_changed)
 	PingManager.ping_updated.connect(_on_ping_updated)
+	if multiplayer.get_unique_id() == name.to_int():
+		print("working")
+		$Camera3D.make_current()
+	else:
+		print("not working")
+		$Camera3D.enabled = false
 
 	if multiplayer.is_server():
 		# Find all lava areas in the scene
@@ -80,12 +86,8 @@ func _on_ping_updated(ping_value):
 	if multiplayer.get_unique_id() == name.to_int():
 		# Only update ping for the local player
 		%PingLabel.text = "Ping: " + str(ping_value) + "ms"
-	#
-	# if multiplayer.get_unique_id() == player_id:
-	#	$Camera2D.make_current()
-	# else:
-	#	$Camera2D.enabled = false
-	#
+
+
 func _on_game_state_changed(key, _value):
 	print("Game state changed")
 	if key == "players":
