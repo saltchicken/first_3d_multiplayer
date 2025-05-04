@@ -13,6 +13,7 @@ const DEFAULT_CAMERA_DISTANCE = 0.5  # Default distance from pivot
 const MIN_CAMERA_DISTANCE = 0.2     # Closest distance when looking down
 
 var input_dir
+var input_rot
 var input_jump
 var input_push = false
 var input_run = false
@@ -25,6 +26,7 @@ func _ready():
 		set_physics_process(false)
 	
 	input_dir = Input.get_vector("left", "right", "up", "down")
+	input_rot = player.global_rotation.y
 
 func _physics_process(_delta):
 	var raw_input = Input.get_vector("left", "right", "up", "down")
@@ -32,6 +34,7 @@ func _physics_process(_delta):
 	# Transform input based on camera rotation
 	if raw_input.length() > 0.1:
 		var cam_y_rotation = player.global_rotation.y
+		input_rot = cam_y_rotation
 		var forward = Vector2(0, 1).rotated(-cam_y_rotation)  # Note the negative rotation
 		var right = Vector2(1, 0).rotated(-cam_y_rotation)     # Same negative rotation
 		

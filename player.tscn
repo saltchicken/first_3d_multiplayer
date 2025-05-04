@@ -654,6 +654,9 @@ properties/2/replication_mode = 1
 properties/3/path = NodePath("InputSynchronizer:input_run")
 properties/3/spawn = true
 properties/3/replication_mode = 1
+properties/4/path = NodePath("InputSynchronizer:input_rot")
+properties/4/spawn = true
+properties/4/replication_mode = 1
 
 [node name="Player" type="CharacterBody3D"]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0)
@@ -664,7 +667,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0259644, 0)
 shape = SubResource("CapsuleShape3D_i3pqv")
 
 [node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="."]
-billboard = 2
 texture_filter = 0
 sprite_frames = SubResource("SpriteFrames_sweqy")
 animation = &"jump_up"
