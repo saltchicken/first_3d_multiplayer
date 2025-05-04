@@ -60,6 +60,36 @@ func _ready_authority_client():
 func _ready_peer_clients():
 	add_to_group("players")
 	GameManager.game_state_changed.connect(_on_game_state_changed)
+	create_direction_arrow()
+
+func create_direction_arrow():
+	# Create the arrow mesh
+	var arrow_mesh = CylinderMesh.new()
+	arrow_mesh.top_radius = 0.0
+	arrow_mesh.bottom_radius = 0.25
+	arrow_mesh.height = 1.0
+	
+	# Create material for the arrow
+	var arrow_material = StandardMaterial3D.new()
+	arrow_material.albedo_color = Color(1.0, 1.0, 1.0)
+	# arrow_material.emission_enabled = true
+	# arrow_material.emission = Color(1.0, 0.2, 0.2)
+	# arrow_material.emission_energy_multiplier = 1.5
+	
+	# Create the mesh instance
+	var direction_arrow = MeshInstance3D.new()
+	direction_arrow.name = "DirectionArrow"
+	direction_arrow.mesh = arrow_mesh
+	direction_arrow.material_override = arrow_material
+	
+	# Position and rotate the arrow correctly
+	# The cylinder is created along y-axis, but we want it pointing forward (-z)
+	direction_arrow.transform.basis = Basis(Vector3(1, 0, 0), -PI/2)
+	direction_arrow.position = Vector3(0, 0, 0)
+	direction_arrow.scale = Vector3(0.1, 0.5, 0.1)
+	
+	# Add to scene
+	add_child(direction_arrow)
 
 func _physics_process_server(delta):
 	_is_on_floor = is_on_floor()
@@ -108,7 +138,7 @@ func _physics_process_peer_client(_delta):
 	var authority_player = _find_authority_player()
 	if authority_player:
 		var to_authority = authority_player.global_position - global_position
-		to_authority.y = 0  # Project onto horizontal plane
+		to_authority.y = 0	# Project onto horizontal plane
 		
 		# Calculate angle in radians
 		var forward = -global_transform.basis.z
@@ -121,6 +151,10 @@ func _physics_process_peer_client(_delta):
 		
 		# Display angle for debugging
 		%RotToPlayer.text = "Angle to auth: %.2f°" % angle_deg
+
+		var direction_arrow = get_node_or_null("DirectionArrow")
+		if direction_arrow:
+			direction_arrow.rotation.y = angle_rad
 
 	_apply_animation()
 
