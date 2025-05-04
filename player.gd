@@ -32,6 +32,8 @@ var synced_last_direction = "down"
 var world_dir
 var cam_basis
 
+var camera_angle_rad
+
 @onready var animated_sprite = $"AnimatedSprite3D"
 @onready var player_name_label = %PlayerNameLabel
 @onready var input_rotation_label = %InputRot
@@ -84,7 +86,7 @@ func create_direction_arrow():
 	
 	# Position and rotate the arrow correctly
 	# The cylinder is created along y-axis, but we want it pointing forward (-z)
-	direction_arrow.transform.basis = Basis(Vector3(1, 0, 0), -PI/2)
+	direction_arrow.transform.basis = Basis(Vector3(1, 0, 0), PI/2)
 	direction_arrow.position = Vector3(0, 0, 0)
 	direction_arrow.scale = Vector3(0.1, 0.5, 0.1)
 	
@@ -143,12 +145,13 @@ func _physics_process_peer_client(_delta):
 
 		var auth_camera = authority_player.get_node_or_null("CameraPivot/Camera3D")
 		if auth_camera:
-			var camera_forward = -auth_camera.global_transform.basis.z
-			camera_forward.y = 0
-			camera_forward = camera_forward.normalized()
+			# Get vector from peer to camera (not to authority player)
+			var to_camera = auth_camera.global_position - global_position
+			to_camera.y = 0  # Project onto horizontal plane
+			to_camera = to_camera.normalized()
 			
-			# Calculate angle between our position and camera's forward
-			var camera_angle_rad = camera_forward.signed_angle_to(-to_authority.normalized(), Vector3.UP)
+			# Calculate angle between camera forward and direction to peer
+			camera_angle_rad = atan2(to_camera.x, to_camera.z)
 			var camera_angle_deg = rad_to_deg(camera_angle_rad)
 			
 			# Display camera angle for debugging
@@ -169,7 +172,7 @@ func _physics_process_peer_client(_delta):
 		# TODO: Remove this if direction_arrow is no longer being used
 		var direction_arrow = get_node_or_null("DirectionArrow")
 		if direction_arrow:
-			direction_arrow.rotation.y = angle_rad
+			direction_arrow.rotation.y = camera_angle_rad
 
 	_apply_animation()
 
