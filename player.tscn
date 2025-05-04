@@ -738,4 +738,10 @@ text = "Angle to auth: "
 font_size = 6
 outline_size = 4
 
+[node name="DirToCamera" type="Label3D" parent="DebugStats"]
+unique_name_in_owner = true
+text = "Angle to camera:"
+font_size = 6
+outline_size = 4
+
 [connection signal="pressed" from="PauseMenu/HBoxContainer/VBoxContainer/Button" to="InputSynchronizer" method="leave_game"]

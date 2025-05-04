@@ -140,6 +140,19 @@ func _physics_process_peer_client(_delta):
 	if authority_player:
 		var to_authority = authority_player.global_position - global_position
 		to_authority.y = 0	# Project onto horizontal plane
+
+		var auth_camera = authority_player.get_node_or_null("CameraPivot/Camera3D")
+		if auth_camera:
+			var camera_forward = -auth_camera.global_transform.basis.z
+			camera_forward.y = 0
+			camera_forward = camera_forward.normalized()
+			
+			# Calculate angle between our position and camera's forward
+			var camera_angle_rad = camera_forward.signed_angle_to(-to_authority.normalized(), Vector3.UP)
+			var camera_angle_deg = rad_to_deg(camera_angle_rad)
+			
+			# Display camera angle for debugging
+			%DirToCamera.text = "Angle to camera: %.2f°" % camera_angle_deg
 		
 		# Calculate angle in radians
 		var forward = -global_transform.basis.z
