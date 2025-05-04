@@ -60,7 +60,6 @@ func _physics_process_server(delta):
 		_apply_movement_from_input(delta)
 	
 	last_direction = synced_last_direction
-	animated_sprite.rotation.y = 0
 
 func _physics_process_authority_client(_delta):
 	_determine_animation_direction()
@@ -78,7 +77,6 @@ func _physics_process_authority_client(_delta):
 func _physics_process_peer_client(_delta):
 	input_rotation_label.text = "%.2f" % %InputSynchronizer.input_rot
 	last_direction = synced_last_direction
-	animated_sprite.rotation.y = 0
 
 	_apply_animation()
 
