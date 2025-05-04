@@ -103,5 +103,3 @@ func toggle_pause():
 	else:
 		pause_menu.visible = false
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	
-	print("Pause toggled: " + str(is_paused))
