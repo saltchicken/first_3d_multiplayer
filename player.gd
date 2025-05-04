@@ -36,8 +36,8 @@ var synced_last_direction = "down"
 @onready var camera_pivot = $CameraPivot
 @onready var camera = $CameraPivot/Camera3D
 
-func _enter_tree():
-	%InputSynchronizer.set_multiplayer_authority(name.to_int())
+func debug(message):
+	print("%s: %s" % [name, message])
 
 func _ready_server():
 	add_to_group("players")
