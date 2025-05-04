@@ -41,8 +41,6 @@ func _enter_tree():
 
 func _ready_server():
 	add_to_group("players")
-	# GameManager.game_state_changed.connect(_on_game_state_changed)
-	# PingManager.ping_updated.connect(_on_ping_updated)
 	var lava_areas = get_tree().get_nodes_in_group("lava")
 	for lava in lava_areas:
 		lava.body_entered.connect(_on_lava_entered)
@@ -55,8 +53,6 @@ func _ready_authority_client():
 
 func _ready_peer_clients():
 	GameManager.game_state_changed.connect(_on_game_state_changed)
-	print("I am still the server")
-	print(multiplayer.get_unique_id())
 
 func _physics_process_server(delta):
 	_is_on_floor = is_on_floor()
@@ -66,7 +62,6 @@ func _physics_process_server(delta):
 	last_direction = synced_last_direction
 	animated_sprite.rotation.y = 0
 
-	# Apply server-determined animation with client-determined direction
 	var full_animation = current_animation_base
 	if current_animation_base != "death":
 		full_animation += "_" + last_direction
@@ -83,10 +78,8 @@ func _physics_process_authority_client(_delta):
 			animated_sprite.rotation.y = 0
 			last_camera_facing_rotation = -global_rotation.y
 
-	# Client-side direction determination
 	input_rotation_label.text = "%.2f" % %InputSynchronizer.input_rot
 
-	# Apply server-determined animation with client-determined direction
 	var full_animation = current_animation_base
 	if current_animation_base != "death":
 		full_animation += "_" + last_direction
@@ -99,7 +92,6 @@ func _physics_process_peer_client(_delta):
 	last_direction = synced_last_direction
 	animated_sprite.rotation.y = 0
 
-	# Apply server-determined animation with client-determined direction
 	var full_animation = current_animation_base
 	if current_animation_base != "death":
 		full_animation += "_" + last_direction
