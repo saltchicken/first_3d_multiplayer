@@ -670,7 +670,8 @@ shape = SubResource("CapsuleShape3D_i3pqv")
 texture_filter = 0
 sprite_frames = SubResource("SpriteFrames_sweqy")
 animation = &"jump_up"
-frame_progress = 0.304787
+frame = 2
+frame_progress = 0.136822
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_interval = 0.01
@@ -716,5 +717,10 @@ unique_name_in_owner = true
 [node name="Camera3D" type="Camera3D" parent="CameraPivot"]
 unique_name_in_owner = true
 transform = Transform3D(0.2, 0, 0, 0, 0.191152, 0.0588281, 0, -0.0588281, 0.191152, 0, 0.186688, 0.490925)
+
+[node name="InputRot" type="Label3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.172516, 0)
+font_size = 12
 
 [connection signal="pressed" from="PauseMenu/HBoxContainer/VBoxContainer/Button" to="InputSynchronizer" method="leave_game"]

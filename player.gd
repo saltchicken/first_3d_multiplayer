@@ -29,6 +29,7 @@ var synced_last_direction = "down"
 
 @onready var animated_sprite = $"AnimatedSprite3D"
 @onready var player_name_label = %PlayerNameLabel
+@onready var input_rotation_label = %InputRot
 @onready var camera_pivot = $CameraPivot
 @onready var camera = $CameraPivot/Camera3D
 
@@ -61,13 +62,15 @@ func _physics_process(delta):
 	# Client-side direction determination
 	if multiplayer.get_unique_id() == name.to_int():
 		_determine_animation_direction()
+		input_rotation_label.text = "%.2f" % %InputSynchronizer.input_rot
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 			if %InputSynchronizer.input_dir.length() < 0.1:
-				animated_sprite.rotation.y = -global_rotation.y - last_camera_facing_rotation
+				animated_sprite.rotation.y = -%InputSynchronizer.input_rot - last_camera_facing_rotation
 			else:
 				animated_sprite.rotation.y = 0
-				last_camera_facing_rotation = -global_rotation.y
+				last_camera_facing_rotation = -%InputSynchronizer.input_rot
 	else:
+		input_rotation_label.text = "%.2f" % %InputSynchronizer.input_rot
 		last_direction = synced_last_direction
 		animated_sprite.rotation.y = 0
 

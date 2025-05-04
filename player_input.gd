@@ -33,10 +33,9 @@ func _physics_process(_delta):
 	
 	# Transform input based on camera rotation
 	if raw_input.length() > 0.1:
-		var cam_y_rotation = player.global_rotation.y
-		input_rot = cam_y_rotation
-		var forward = Vector2(0, 1).rotated(-cam_y_rotation)  # Note the negative rotation
-		var right = Vector2(1, 0).rotated(-cam_y_rotation)     # Same negative rotation
+		input_rot = player.global_rotation.y
+		var forward = Vector2(0, 1).rotated(-input_rot)  # Note the negative rotation
+		var right = Vector2(1, 0).rotated(-input_rot)     # Same negative rotation
 		
 		# Combine them based on input
 		input_dir = right * raw_input.x + forward * raw_input.y
