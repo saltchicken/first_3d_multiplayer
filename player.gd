@@ -108,14 +108,14 @@ func _determine_animation_direction():
 		pass
 		# print(last_direction)
 		# var player_forward = -global_transform.basis.z
-		# player_forward.y = 0  # Project onto horizontal plane
+		# player_forward.y = 0	# Project onto horizontal plane
 		# player_forward = player_forward.normalized()
 
 		# Determine direction based on the largest component
 		# if abs(player_forward.x) > abs(player_forward.z):
-		# 	last_direction = "right" if player_forward.x > 0 else "left"
+		#	last_direction = "right" if player_forward.x > 0 else "left"
 		# else:
-		# 	last_direction = "up" if player_forward.z > 0 else "down"
+		#	last_direction = "up" if player_forward.z > 0 else "down"
 		#
 
 func _apply_movement_from_input(delta):
@@ -133,17 +133,23 @@ func _apply_movement_from_input(delta):
 	if input_jump and is_on_floor() and jump_cooldown_timer <= 0:
 		velocity.y = JUMP_VELOCITY
 		jump_cooldown_timer = JUMP_COOLDOWN
+		jump_animation_timer = JUMP_ANIMATION_DURATION
 	
 	# Update cooldown timers
 	if jump_cooldown_timer > 0:
 		jump_cooldown_timer -= delta
 	if push_cooldown > 0:
 		push_cooldown -= delta
+	if jump_animation_timer > 0:
+		jump_animation_timer -= delta
+	if push_animation_timer > 0:
+		push_animation_timer -= delta
 	
 	# Handle push attack
 	if input_push and push_cooldown <= 0:
 		perform_push_attack()
 		push_cooldown = PUSH_COOLDOWN_DURATION
+		push_animation_timer = PUSH_COOLDOWN_DURATION
 	
 	# Calculate movement direction based on client's camera rotation
 	var direction = Vector3.ZERO
@@ -191,13 +197,13 @@ func _apply_movement_from_input(delta):
 		return
 		
 	# Handle push animation
-	if input_push and push_cooldown <= 0:
+	if push_animation_timer > 0:
 		current_animation_base = "push"
 		animation_speed = 1.0
 		return
 		
 	# Handle jump animation
-	if input_jump and is_on_floor() and jump_cooldown_timer <= 0:
+	if jump_animation_timer > 0:
 		current_animation_base = "jump"
 		animation_speed = 1.0
 		return
