@@ -62,15 +62,31 @@ func _physics_process_server(delta):
 	last_direction = synced_last_direction
 
 func _physics_process_authority_client(_delta):
-	_determine_animation_direction()
+	var input_dir = %InputSynchronizer.input_dir
+	input_rotation_label.text = "%.2f" % %InputSynchronizer.input_rot
+	
 	if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		if %InputSynchronizer.input_dir.length() < 0.1:
+		if input_dir.length() < 0.1:
 			animated_sprite.rotation.y = -global_rotation.y - last_camera_facing_rotation
 		else:
+			var cam_basis = camera.global_transform.basis
+			var forward = -cam_basis.z
+			var right = cam_basis.x
+			
+			forward.y = 0
+			right.y = 0
+			forward = forward.normalized()
+			right = right.normalized()
+			
+			var world_dir = (right * input_dir.x + forward * input_dir.y).normalized()
+			
+			if abs(world_dir.x) > abs(world_dir.z):
+				last_direction = "right" if world_dir.x > 0 else "left"
+			else:
+				last_direction = "up" if world_dir.z > 0 else "down"
 			animated_sprite.rotation.y = 0
 			last_camera_facing_rotation = -global_rotation.y
 
-	input_rotation_label.text = "%.2f" % %InputSynchronizer.input_rot
 
 	_apply_animation()
 
@@ -88,44 +104,6 @@ func _apply_animation():
 	animated_sprite.play(full_animation)
 	animated_sprite.speed_scale = animation_speed
 
-# Client-side function to determine the appropriate direction
-func _determine_animation_direction():
-	var input_dir = %InputSynchronizer.input_dir
-	
-	if input_dir.length() > 0.1:
-		# When moving, determine direction based on camera-relative input
-		# Get camera's forward and right vectors
-		var cam_basis = camera.global_transform.basis
-		var forward = -cam_basis.z
-		var right = cam_basis.x
-		
-		# Project to horizontal plane
-		forward.y = 0
-		right.y = 0
-		forward = forward.normalized()
-		right = right.normalized()
-		
-		# Calculate world-space movement direction
-		var world_dir = (right * input_dir.x + forward * input_dir.y).normalized()
-		
-		# Determine cardinal direction based on world direction
-		if abs(world_dir.x) > abs(world_dir.z):
-			last_direction = "right" if world_dir.x > 0 else "left"
-		else:
-			last_direction = "up" if world_dir.z > 0 else "down"
-	else:
-		pass
-		# print(last_direction)
-		# var player_forward = -global_transform.basis.z
-		# player_forward.y = 0	# Project onto horizontal plane
-		# player_forward = player_forward.normalized()
-
-		# Determine direction based on the largest component
-		# if abs(player_forward.x) > abs(player_forward.z):
-		#	last_direction = "right" if player_forward.x > 0 else "left"
-		# else:
-		#	last_direction = "up" if player_forward.z > 0 else "down"
-		#
 
 func _apply_movement_from_input(delta):
 	# Apply gravity
