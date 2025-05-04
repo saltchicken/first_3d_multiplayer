@@ -62,12 +62,7 @@ func _physics_process_server(delta):
 	last_direction = synced_last_direction
 	animated_sprite.rotation.y = 0
 
-	var full_animation = current_animation_base
-	if current_animation_base != "death":
-		full_animation += "_" + last_direction
-	
-	animated_sprite.play(full_animation)
-	animated_sprite.speed_scale = animation_speed
+	_apply_animation()
 
 func _physics_process_authority_client(_delta):
 	_determine_animation_direction()
@@ -80,18 +75,16 @@ func _physics_process_authority_client(_delta):
 
 	input_rotation_label.text = "%.2f" % %InputSynchronizer.input_rot
 
-	var full_animation = current_animation_base
-	if current_animation_base != "death":
-		full_animation += "_" + last_direction
-	
-	animated_sprite.play(full_animation)
-	animated_sprite.speed_scale = animation_speed
+	_apply_animation()
 
 func _physics_process_peer_client(_delta):
 	input_rotation_label.text = "%.2f" % %InputSynchronizer.input_rot
 	last_direction = synced_last_direction
 	animated_sprite.rotation.y = 0
 
+	_apply_animation()
+
+func _apply_animation():
 	var full_animation = current_animation_base
 	if current_animation_base != "death":
 		full_animation += "_" + last_direction
