@@ -62,8 +62,6 @@ func _physics_process_server(delta):
 	last_direction = synced_last_direction
 	animated_sprite.rotation.y = 0
 
-	_apply_animation()
-
 func _physics_process_authority_client(_delta):
 	_determine_animation_direction()
 	if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
