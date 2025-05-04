@@ -107,9 +107,6 @@ func _physics_process_peer_client(_delta):
 	animated_sprite.play(full_animation)
 	animated_sprite.speed_scale = animation_speed
 
-
-	
-
 # Client-side function to determine the appropriate direction
 func _determine_animation_direction():
 	var input_dir = %InputSynchronizer.input_dir
