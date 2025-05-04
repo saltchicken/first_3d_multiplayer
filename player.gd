@@ -1,5 +1,8 @@
 extends CharacterBody3D
 
+enum Role {SERVER, AUTHORITY_CLIENT, PEER_CLIENT}
+var role = Role.PEER_CLIENT
+
 const SPEED = 2.5
 const RUN_SPEED_MULTIPLIER = 1.8
 const JUMP_VELOCITY = 2.5
@@ -36,42 +39,32 @@ var synced_last_direction = "down"
 func _enter_tree():
 	%InputSynchronizer.set_multiplayer_authority(name.to_int())
 
-func _ready():
+func _ready_server():
 	add_to_group("players")
+	# GameManager.game_state_changed.connect(_on_game_state_changed)
+	# PingManager.ping_updated.connect(_on_ping_updated)
+	var lava_areas = get_tree().get_nodes_in_group("lava")
+	for lava in lava_areas:
+		lava.body_entered.connect(_on_lava_entered)
+
+func _ready_authority_client():
 	GameManager.game_state_changed.connect(_on_game_state_changed)
 	PingManager.ping_updated.connect(_on_ping_updated)
-	if multiplayer.get_unique_id() == name.to_int():
-		print("Set up player for client side")
-		camera.make_current()
-		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	else:
-		print("Player init on instance that is not client")
+	camera.make_current()
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
-	if multiplayer.is_server():
-		# Find all lava areas in the scene
-		var lava_areas = get_tree().get_nodes_in_group("lava")
-		for lava in lava_areas:
-			lava.body_entered.connect(_on_lava_entered)
+func _ready_peer_clients():
+	GameManager.game_state_changed.connect(_on_game_state_changed)
+	print("I am still the server")
+	print(multiplayer.get_unique_id())
 
-func _physics_process(delta):
-	if multiplayer.is_server():
-		_is_on_floor = is_on_floor()
-		if alive:
-			_apply_movement_from_input(delta)
+func _physics_process_server(delta):
+	_is_on_floor = is_on_floor()
+	if alive:
+		_apply_movement_from_input(delta)
 	
-	# Client-side direction determination
-	input_rotation_label.text = "%.2f" % %InputSynchronizer.input_rot
-	if multiplayer.get_unique_id() == name.to_int():
-		_determine_animation_direction()
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-			if %InputSynchronizer.input_dir.length() < 0.1:
-				animated_sprite.rotation.y = -global_rotation.y - last_camera_facing_rotation
-			else:
-				animated_sprite.rotation.y = 0
-				last_camera_facing_rotation = -global_rotation.y
-	else:
-		last_direction = synced_last_direction
-		animated_sprite.rotation.y = 0
+	last_direction = synced_last_direction
+	animated_sprite.rotation.y = 0
 
 	# Apply server-determined animation with client-determined direction
 	var full_animation = current_animation_base
@@ -80,6 +73,42 @@ func _physics_process(delta):
 	
 	animated_sprite.play(full_animation)
 	animated_sprite.speed_scale = animation_speed
+
+func _physics_process_authority_client(_delta):
+	_determine_animation_direction()
+	if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+		if %InputSynchronizer.input_dir.length() < 0.1:
+			animated_sprite.rotation.y = -global_rotation.y - last_camera_facing_rotation
+		else:
+			animated_sprite.rotation.y = 0
+			last_camera_facing_rotation = -global_rotation.y
+
+	# Client-side direction determination
+	input_rotation_label.text = "%.2f" % %InputSynchronizer.input_rot
+
+	# Apply server-determined animation with client-determined direction
+	var full_animation = current_animation_base
+	if current_animation_base != "death":
+		full_animation += "_" + last_direction
+	
+	animated_sprite.play(full_animation)
+	animated_sprite.speed_scale = animation_speed
+
+func _physics_process_peer_client(_delta):
+	input_rotation_label.text = "%.2f" % %InputSynchronizer.input_rot
+	last_direction = synced_last_direction
+	animated_sprite.rotation.y = 0
+
+	# Apply server-determined animation with client-determined direction
+	var full_animation = current_animation_base
+	if current_animation_base != "death":
+		full_animation += "_" + last_direction
+	
+	animated_sprite.play(full_animation)
+	animated_sprite.speed_scale = animation_speed
+
+
+	
 
 # Client-side function to determine the appropriate direction
 func _determine_animation_direction():
@@ -317,3 +346,27 @@ func _on_game_state_changed(key, _value):
 			player_name_label.text = GameManager.game_state.players[name].name
 		else:
 			player_name_label.text = "Player " + name
+
+func _ready():
+	if multiplayer.is_server():
+		role = Role.SERVER
+	elif multiplayer.get_unique_id() == name.to_int():
+		role = Role.AUTHORITY_CLIENT
+	
+	match role:
+		Role.SERVER:
+			_ready_server()
+		Role.AUTHORITY_CLIENT:
+			_ready_authority_client()
+		Role.PEER_CLIENT:
+			_ready_peer_clients()
+
+func _physics_process(delta):
+	match role:
+		Role.SERVER:
+			_physics_process_server(delta)
+		Role.AUTHORITY_CLIENT:
+			_physics_process_authority_client(delta)
+		Role.PEER_CLIENT:
+			_physics_process_peer_client(delta)
+
