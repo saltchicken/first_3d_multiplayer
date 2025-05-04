@@ -4,8 +4,6 @@ extends MultiplayerSynchronizer
 @onready var pause_menu = %PauseMenu
 @onready var camera_pivot = $"../CameraPivot"
 @onready var camera = $"../CameraPivot/Camera3D"
-@onready var debug_stats = $"../DebugStats"
-
 
 # Camera control constants
 const MOUSE_SENSITIVITY = 0.002
@@ -30,9 +28,6 @@ func _ready():
 	input_dir = Input.get_vector("left", "right", "up", "down")
 	input_rot = player.global_rotation.y
 
-	if debug_stats:
-		debug_stats.visible = false
-
 func _physics_process(_delta):
 	var raw_input = Input.get_vector("left", "right", "up", "down")
 	
@@ -54,8 +49,6 @@ func _physics_process(_delta):
 	input_push = Input.get_action_strength("push")
 	if Input.is_action_just_pressed("pause"):
 		toggle_pause()
-	if Input.is_action_just_pressed("console") and debug_stats:
-		debug_stats.visible = !debug_stats.visible
 
 func _unhandled_input(event):
 	if get_multiplayer_authority() != multiplayer.get_unique_id():

@@ -703,8 +703,10 @@ text = "Exit"
 
 [node name="PlayerNameLabel" type="Label3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.241533, 0)
-font_size = 12
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.203464, 0)
+billboard = 2
+font_size = 8
+outline_size = 4
 
 [node name="HUD" type="CanvasLayer" parent="."]
 
@@ -721,15 +723,19 @@ unique_name_in_owner = true
 transform = Transform3D(0.2, 0, 0, 0, 0.191152, 0.0588281, 0, -0.0588281, 0.191152, 0, 0.186688, 0.490925)
 
 [node name="DebugStats" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.244408, 0)
 script = ExtResource("4_hqtel")
-spacing = 0.1
+spacing = 0.025
 
 [node name="InputRot" type="Label3D" parent="DebugStats"]
 unique_name_in_owner = true
-font_size = 12
+font_size = 6
+outline_size = 4
 
 [node name="RotToPlayer" type="Label3D" parent="DebugStats"]
 unique_name_in_owner = true
-font_size = 12
+text = "Angle to auth: "
+font_size = 6
+outline_size = 4
 
 [connection signal="pressed" from="PauseMenu/HBoxContainer/VBoxContainer/Button" to="InputSynchronizer" method="leave_game"]

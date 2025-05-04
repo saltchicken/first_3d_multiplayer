@@ -71,7 +71,7 @@ func _physics_process_server(delta):
 func _physics_process_authority_client(_delta):
 	var input_dir = %InputSynchronizer.input_dir
 	var input_rot = %InputSynchronizer.input_rot
-	input_rotation_label.text = "%.2f" % input_rot
+	input_rotation_label.text = "Input Rotation: %.2f" % %InputSynchronizer.input_rot
 	
 	if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		cam_basis = camera.global_transform.basis
@@ -102,7 +102,7 @@ func _physics_process_authority_client(_delta):
 	_apply_animation()
 
 func _physics_process_peer_client(_delta):
-	input_rotation_label.text = "%.2f" % %InputSynchronizer.input_rot
+	input_rotation_label.text = "Input Rotation: %.2f" % %InputSynchronizer.input_rot
 	last_direction = synced_last_direction
 
 	var authority_player = _find_authority_player()
@@ -117,6 +117,7 @@ func _physics_process_peer_client(_delta):
 		
 		var angle_rad = forward.signed_angle_to(to_authority.normalized(), Vector3.UP)
 		var angle_deg = rad_to_deg(angle_rad)
+
 		
 		# Display angle for debugging
 		%RotToPlayer.text = "Angle to auth: %.2f°" % angle_deg

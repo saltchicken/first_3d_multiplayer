@@ -11,8 +11,9 @@ func reposition_children():
 		var child := get_child(i)
 		var pos := Vector3.ZERO
 		if vertical:
-			pos.y = -i * spacing  # Negative to stack downward
+			pos.y = i * spacing  # Negative to stack downward
 		else:
 			pos.x = i * spacing
 		child.position = pos
+		child.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 
