@@ -664,6 +664,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0259644, 0)
 shape = SubResource("CapsuleShape3D_i3pqv")
 
 [node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="."]
+billboard = 2
 texture_filter = 0
 sprite_frames = SubResource("SpriteFrames_sweqy")
 animation = &"jump_up"
