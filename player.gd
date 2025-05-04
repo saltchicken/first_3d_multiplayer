@@ -126,7 +126,8 @@ func _physics_process_authority_client(_delta):
 			last_camera_facing_rotation = -global_rotation.y
 
 	# debug(cam_basis)
-	# debug(world_dir)
+	debug(world_dir)
+	debug(input_dir)
 	# debug(last_direction)
 
 	_apply_animation()
@@ -152,6 +153,7 @@ func _physics_process_peer_client(_delta):
 		# Display angle for debugging
 		%RotToPlayer.text = "Angle to auth: %.2f°" % angle_deg
 
+		# TODO: Remove this if direction_arrow is no longer being used
 		var direction_arrow = get_node_or_null("DirectionArrow")
 		if direction_arrow:
 			direction_arrow.rotation.y = angle_rad
@@ -396,4 +398,3 @@ func _physics_process(delta):
 			_physics_process_authority_client(delta)
 		Role.PEER_CLIENT:
 			_physics_process_peer_client(delta)
-
