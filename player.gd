@@ -5,7 +5,7 @@ const RUN_SPEED_MULTIPLIER = 1.8
 const JUMP_VELOCITY = 2.5
 
 const PUSH_FORCE = 200.0
-const PUSH_RADIUS = 2.0
+const PUSH_RADIUS = 1.2
 var push_cooldown = 0.0
 var push_animation_timer = 0.0
 const PUSH_COOLDOWN_DURATION = 0.1
