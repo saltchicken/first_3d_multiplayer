@@ -61,9 +61,16 @@ func _physics_process(delta):
 	# Client-side direction determination
 	if multiplayer.get_unique_id() == name.to_int():
 		_determine_animation_direction()
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+			if %InputSynchronizer.input_dir.length() < 0.1:
+				animated_sprite.rotation.y = -global_rotation.y - last_camera_facing_rotation
+			else:
+				animated_sprite.rotation.y = 0
+				last_camera_facing_rotation = -global_rotation.y
 	else:
-		# For other players, determine direction based on their movement
 		last_direction = synced_last_direction
+		animated_sprite.rotation.y = 0
+
 	# Apply server-determined animation with client-determined direction
 	var full_animation = current_animation_base
 	if current_animation_base != "death":
@@ -71,18 +78,6 @@ func _physics_process(delta):
 	
 	animated_sprite.play(full_animation)
 	animated_sprite.speed_scale = animation_speed
-	
-	# Only handle camera-relative sprite rotation on client
-	if multiplayer.get_unique_id() == name.to_int():
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-			if %InputSynchronizer.input_dir.length() < 0.1:
-				# Make sprite face the camera when not moving
-				animated_sprite.rotation.y = -global_rotation.y - last_camera_facing_rotation
-				pass
-			else:
-				animated_sprite.rotation.y = 0
-				last_camera_facing_rotation = -global_rotation.y
-				pass
 
 # Client-side function to determine the appropriate direction
 func _determine_animation_direction():
@@ -122,29 +117,6 @@ func _determine_animation_direction():
 		# else:
 		# 	last_direction = "up" if player_forward.z > 0 else "down"
 		#
-
-func _determine_other_player_direction():
-	# Get the player's velocity
-	var player_velocity = Vector3(velocity.x, 0, velocity.z)
-	
-	# If the player is moving
-	if player_velocity.length() > 0.1:
-		# Determine direction based on velocity
-		if abs(player_velocity.x) > abs(player_velocity.z):
-			last_direction = "right" if player_velocity.x > 0 else "left"
-		else:
-			last_direction = "down" if player_velocity.z > 0 else "up"
-	else:
-		# When not moving, use the player's rotation
-		var player_forward = -global_transform.basis.z
-		player_forward.y = 0  # Project onto horizontal plane
-		player_forward = player_forward.normalized()
-		
-		# Determine direction based on the largest component
-		if abs(player_forward.x) > abs(player_forward.z):
-			last_direction = "right" if player_forward.x > 0 else "left"
-		else:
-			last_direction = "down" if player_forward.z > 0 else "up"
 
 func _apply_movement_from_input(delta):
 	# Apply gravity
