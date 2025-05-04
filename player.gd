@@ -39,6 +39,9 @@ var synced_last_direction = "down"
 func debug(message):
 	print("%s: %s" % [name, message])
 
+func _enter_tree():
+	%InputSynchronizer.set_multiplayer_authority(name.to_int())
+
 func _ready_server():
 	add_to_group("players")
 	var lava_areas = get_tree().get_nodes_in_group("lava")
@@ -87,6 +90,7 @@ func _physics_process_authority_client(_delta):
 			animated_sprite.rotation.y = 0
 			last_camera_facing_rotation = -global_rotation.y
 
+	debug(last_direction)
 
 	_apply_animation()
 
