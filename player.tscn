@@ -1,8 +1,9 @@
-[gd_scene load_steps=81 format=3 uid="uid://bk6x4rvwunklf"]
+[gd_scene load_steps=82 format=3 uid="uid://bk6x4rvwunklf"]
 
 [ext_resource type="Script" uid="uid://dvav0l8m22oyv" path="res://player.gd" id="1_4flbx"]
 [ext_resource type="Texture2D" uid="uid://tunf1xiuva2y" path="res://char_a_p1_0bas_demn_v01.png" id="2_onrkg"]
 [ext_resource type="Script" uid="uid://c3p0vg8fygcok" path="res://player_input.gd" id="3_i3pqv"]
+[ext_resource type="Script" uid="uid://088x8xx047t8" path="res://debug_stats.gd" id="4_hqtel"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_i3pqv"]
 radius = 0.0784727
@@ -703,6 +704,7 @@ text = "Exit"
 [node name="PlayerNameLabel" type="Label3D" parent="."]
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.241533, 0)
+font_size = 12
 
 [node name="HUD" type="CanvasLayer" parent="."]
 
@@ -718,9 +720,16 @@ unique_name_in_owner = true
 unique_name_in_owner = true
 transform = Transform3D(0.2, 0, 0, 0, 0.191152, 0.0588281, 0, -0.0588281, 0.191152, 0, 0.186688, 0.490925)
 
-[node name="InputRot" type="Label3D" parent="."]
+[node name="DebugStats" type="Node3D" parent="."]
+script = ExtResource("4_hqtel")
+spacing = 0.1
+
+[node name="InputRot" type="Label3D" parent="DebugStats"]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.172516, 0)
+font_size = 12
+
+[node name="RotToPlayer" type="Label3D" parent="DebugStats"]
+unique_name_in_owner = true
 font_size = 12
 
 [connection signal="pressed" from="PauseMenu/HBoxContainer/VBoxContainer/Button" to="InputSynchronizer" method="leave_game"]

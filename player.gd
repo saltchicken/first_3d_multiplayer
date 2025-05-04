@@ -29,6 +29,8 @@ var current_animation_base = "idle" # Base animation without direction
 var animation_speed = 1.0
 
 var synced_last_direction = "down"
+var world_dir
+var cam_basis
 
 @onready var animated_sprite = $"AnimatedSprite3D"
 @onready var player_name_label = %PlayerNameLabel
@@ -49,12 +51,14 @@ func _ready_server():
 		lava.body_entered.connect(_on_lava_entered)
 
 func _ready_authority_client():
+	add_to_group("players")
 	GameManager.game_state_changed.connect(_on_game_state_changed)
 	PingManager.ping_updated.connect(_on_ping_updated)
 	camera.make_current()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 func _ready_peer_clients():
+	add_to_group("players")
 	GameManager.game_state_changed.connect(_on_game_state_changed)
 
 func _physics_process_server(delta):
@@ -66,13 +70,14 @@ func _physics_process_server(delta):
 
 func _physics_process_authority_client(_delta):
 	var input_dir = %InputSynchronizer.input_dir
-	input_rotation_label.text = "%.2f" % %InputSynchronizer.input_rot
+	var input_rot = %InputSynchronizer.input_rot
+	input_rotation_label.text = "%.2f" % input_rot
 	
 	if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+		cam_basis = camera.global_transform.basis
 		if input_dir.length() < 0.1:
 			animated_sprite.rotation.y = -global_rotation.y - last_camera_facing_rotation
 		else:
-			var cam_basis = camera.global_transform.basis
 			var forward = -cam_basis.z
 			var right = cam_basis.x
 			
@@ -81,7 +86,7 @@ func _physics_process_authority_client(_delta):
 			forward = forward.normalized()
 			right = right.normalized()
 			
-			var world_dir = (right * input_dir.x + forward * input_dir.y).normalized()
+			world_dir = (right * input_dir.x + forward * input_dir.y).normalized()
 			
 			if abs(world_dir.x) > abs(world_dir.z):
 				last_direction = "right" if world_dir.x > 0 else "left"
@@ -90,13 +95,31 @@ func _physics_process_authority_client(_delta):
 			animated_sprite.rotation.y = 0
 			last_camera_facing_rotation = -global_rotation.y
 
-	debug(last_direction)
+	# debug(cam_basis)
+	# debug(world_dir)
+	# debug(last_direction)
 
 	_apply_animation()
 
 func _physics_process_peer_client(_delta):
 	input_rotation_label.text = "%.2f" % %InputSynchronizer.input_rot
 	last_direction = synced_last_direction
+
+	var authority_player = _find_authority_player()
+	if authority_player:
+		var to_authority = authority_player.global_position - global_position
+		to_authority.y = 0  # Project onto horizontal plane
+		
+		# Calculate angle in radians
+		var forward = -global_transform.basis.z
+		forward.y = 0
+		forward = forward.normalized()
+		
+		var angle_rad = forward.signed_angle_to(to_authority.normalized(), Vector3.UP)
+		var angle_deg = rad_to_deg(angle_rad)
+		
+		# Display angle for debugging
+		%RotToPlayer.text = "Angle to auth: %.2f°" % angle_deg
 
 	_apply_animation()
 
@@ -107,6 +130,15 @@ func _apply_animation():
 	
 	animated_sprite.play(full_animation)
 	animated_sprite.speed_scale = animation_speed
+
+func _find_authority_player():
+	var players = get_tree().get_nodes_in_group("players")
+	for player in players:
+		if player.name.to_int() == name.to_int():
+			continue  # Skip self
+		if player.role == Role.AUTHORITY_CLIENT:
+			return player
+	return null
 
 
 func _apply_movement_from_input(delta):
