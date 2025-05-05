@@ -723,12 +723,32 @@ unique_name_in_owner = true
 transform = Transform3D(0.2, 0, 0, 0, 0.191152, 0.0588281, 0, -0.0588281, 0.191152, 0, 0.186688, 0.490925)
 
 [node name="DebugStats" type="Node3D" parent="."]
+unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.244408, 0)
 script = ExtResource("4_hqtel")
 spacing = 0.025
+excluded_names = Array[String](["RotToPlayer", "DirToCamera"])
 
 [node name="InputRot" type="Label3D" parent="DebugStats"]
 unique_name_in_owner = true
+font_size = 6
+outline_size = 4
+
+[node name="LastDirection" type="Label3D" parent="DebugStats"]
+unique_name_in_owner = true
+text = "Last Direction: "
+font_size = 6
+outline_size = 4
+
+[node name="POVDir" type="Label3D" parent="DebugStats"]
+unique_name_in_owner = true
+text = "POV Direction: "
+font_size = 6
+outline_size = 4
+
+[node name="InputDir" type="Label3D" parent="DebugStats"]
+unique_name_in_owner = true
+text = "Input Direction: "
 font_size = 6
 outline_size = 4
 
