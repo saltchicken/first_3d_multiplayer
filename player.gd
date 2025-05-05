@@ -98,13 +98,14 @@ func _physics_process_authority_client(_delta):
 			right = right.normalized()
 			
 			direction = (right * input_dir.x + forward * input_dir.y).normalized()
+			direction = Vector2(direction.x, direction.z)
 			%POVDir.text = "POV Dir: " + str(direction)
 			%InputDir.text = "World Dir: " + str(input_dir)
 			
-			if abs(direction.x) > abs(direction.z):
+			if abs(direction.x) > abs(direction.y):
 				last_direction = "right" if direction.x > 0 else "left"
 			else:
-				last_direction = "up" if direction.z > 0 else "down"
+				last_direction = "up" if direction.y > 0 else "down"
 			animated_sprite.rotation.y = 0
 			last_camera_facing_rotation = -global_rotation.y
 
