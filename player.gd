@@ -20,7 +20,7 @@ var jump_cooldown_timer = 0.0
 
 const FRICTION = 0.2
 
-var last_direction = "down"
+var last_direction = Vector2(0, -1)
 var _is_on_floor = true
 var alive = true
 
@@ -28,7 +28,8 @@ var last_camera_facing_rotation = 0.0
 var current_animation_base = "idle" # Base animation without direction
 var animation_speed = 1.0
 
-var synced_last_direction = "down"
+var synced_last_direction = Vector2(0, -1)
+var animation_direction = ""
 var direction
 var cam_basis
 
@@ -102,10 +103,11 @@ func _physics_process_authority_client(_delta):
 			%POVDir.text = "POV Dir: " + str(direction)
 			%InputDir.text = "World Dir: " + str(input_dir)
 			
-			if abs(direction.x) > abs(direction.y):
-				last_direction = "right" if direction.x > 0 else "left"
-			else:
-				last_direction = "up" if direction.y > 0 else "down"
+			# if abs(direction.x) > abs(direction.y):
+			# 	last_direction = "right" if direction.x > 0 else "left"
+			# else:
+			# 	last_direction = "up" if direction.y > 0 else "down"
+			last_direction = direction
 			animated_sprite.rotation.y = 0
 			last_camera_facing_rotation = -global_rotation.y
 
@@ -114,7 +116,7 @@ func _physics_process_authority_client(_delta):
 	# debug(input_dir)
 	# debug(last_direction)
 
-	%LastDirection.text = "Last Direction: " + last_direction
+	%LastDirection.text = "Last Direction: " + str(last_direction)
 	_apply_animation()
 
 func _physics_process_peer_client(_delta):
@@ -143,11 +145,11 @@ func _physics_process_peer_client(_delta):
 			%DirToCamera.text = "Angle to camera: %.2f°" % camera_angle_deg
 			
 			# TODO: Why do these magic numbers work?
-			if camera_angle_deg > 90 or camera_angle_deg < -90:
-				if last_direction == "up":
-					last_direction = "down"
-				elif last_direction == "down":
-					last_direction = "up"
+			# if camera_angle_deg > 90 or camera_angle_deg < -90:
+			# 	if last_direction == "up":
+			# 		last_direction = "down"
+			# 	elif last_direction == "down":
+			# 		last_direction = "up"
 		
 		# Calculate angle in radians
 		var forward = -global_transform.basis.z
@@ -161,14 +163,18 @@ func _physics_process_peer_client(_delta):
 		
 		# Display angle for debugging
 		%RotToPlayer.text = "Angle to auth: %.2f°" % angle_deg
-		%LastDirection.text = "Last Direction: " + last_direction
+		%LastDirection.text = "Last Direction: " + str(last_direction)
 
 	_apply_animation()
 
 func _apply_animation():
+	if abs(last_direction.x) > abs(last_direction.y):
+		animation_direction = "right" if last_direction.x > 0 else "left"
+	else:
+		animation_direction = "up" if last_direction.y > 0 else "down"
 	var full_animation = current_animation_base
 	if current_animation_base != "death":
-		full_animation += "_" + last_direction
+		full_animation += "_" + animation_direction
 	
 	animated_sprite.play(full_animation)
 	animated_sprite.speed_scale = animation_speed
@@ -225,11 +231,11 @@ func _apply_movement_from_input(delta):
 		direction = direction.normalized()
 	
 		# Server still tracks direction for other calculations
-		if abs(input_dir.x) > abs(input_dir.y):
-			last_direction = "right" if input_dir.x > 0 else "left"
-		else:
-			last_direction = "down" if input_dir.y > 0 else "up"
-		synced_last_direction = last_direction
+		# if abs(input_dir.x) > abs(input_dir.y):
+		# 	last_direction = "right" if input_dir.x > 0 else "left"
+		# else:
+		# 	last_direction = "down" if input_dir.y > 0 else "up"
+		synced_last_direction = Vector2(direction.x, direction.z)
 	
 	# Apply friction
 	velocity.x *= (1.0 - FRICTION)
