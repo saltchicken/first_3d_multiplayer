@@ -29,7 +29,7 @@ var current_animation_base = "idle" # Base animation without direction
 var animation_speed = 1.0
 
 var synced_last_direction = "down"
-var world_dir
+var direction
 var cam_basis
 
 var camera_angle_rad
@@ -39,6 +39,8 @@ var camera_angle_rad
 @onready var input_rotation_label = %InputRot
 @onready var camera_pivot = $CameraPivot
 @onready var camera = $CameraPivot/Camera3D
+
+@onready var debug_stats = %DebugStats
 
 func debug(message):
 	print("%s: %s" % [name, message])
@@ -58,40 +60,14 @@ func _ready_authority_client():
 	PingManager.ping_updated.connect(_on_ping_updated)
 	camera.make_current()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	# TODO: Remove this when debug_stats is removed
+	if debug_stats:
+		debug_stats.remove_excluded_children()
 
 func _ready_peer_clients():
 	add_to_group("players")
 	GameManager.game_state_changed.connect(_on_game_state_changed)
-	create_direction_arrow()
 
-func create_direction_arrow():
-	# Create the arrow mesh
-	var arrow_mesh = CylinderMesh.new()
-	arrow_mesh.top_radius = 0.0
-	arrow_mesh.bottom_radius = 0.25
-	arrow_mesh.height = 1.0
-	
-	# Create material for the arrow
-	var arrow_material = StandardMaterial3D.new()
-	arrow_material.albedo_color = Color(1.0, 1.0, 1.0)
-	# arrow_material.emission_enabled = true
-	# arrow_material.emission = Color(1.0, 0.2, 0.2)
-	# arrow_material.emission_energy_multiplier = 1.5
-	
-	# Create the mesh instance
-	var direction_arrow = MeshInstance3D.new()
-	direction_arrow.name = "DirectionArrow"
-	direction_arrow.mesh = arrow_mesh
-	direction_arrow.material_override = arrow_material
-	
-	# Position and rotate the arrow correctly
-	# The cylinder is created along y-axis, but we want it pointing forward (-z)
-	direction_arrow.transform.basis = Basis(Vector3(1, 0, 0), PI/2)
-	direction_arrow.position = Vector3(0, 0, 0)
-	direction_arrow.scale = Vector3(0.1, 0.5, 0.1)
-	
-	# Add to scene
-	add_child(direction_arrow)
 
 func _physics_process_server(delta):
 	_is_on_floor = is_on_floor()
@@ -110,6 +86,9 @@ func _physics_process_authority_client(_delta):
 		if input_dir.length() < 0.1:
 			animated_sprite.rotation.y = -global_rotation.y - last_camera_facing_rotation
 		else:
+			# var rotation_matrix = Basis(Vector3.UP, input_rot)
+			# var forward = -rotation_matrix.z
+			# var right = rotation_matrix.x
 			var forward = -cam_basis.z
 			var right = cam_basis.x
 			
@@ -118,20 +97,23 @@ func _physics_process_authority_client(_delta):
 			forward = forward.normalized()
 			right = right.normalized()
 			
-			world_dir = (right * input_dir.x + forward * input_dir.y).normalized()
+			direction = (right * input_dir.x + forward * input_dir.y).normalized()
+			%POVDir.text = "POV Dir: " + str(direction)
+			%InputDir.text = "World Dir: " + str(input_dir)
 			
-			if abs(world_dir.x) > abs(world_dir.z):
-				last_direction = "right" if world_dir.x > 0 else "left"
+			if abs(direction.x) > abs(direction.z):
+				last_direction = "right" if direction.x > 0 else "left"
 			else:
-				last_direction = "up" if world_dir.z > 0 else "down"
+				last_direction = "up" if direction.z > 0 else "down"
 			animated_sprite.rotation.y = 0
 			last_camera_facing_rotation = -global_rotation.y
 
 	# debug(cam_basis)
-	debug(world_dir)
-	debug(input_dir)
+	# debug(world_dir)
+	# debug(input_dir)
 	# debug(last_direction)
 
+	%LastDirection.text = "Last Direction: " + last_direction
 	_apply_animation()
 
 func _physics_process_peer_client(_delta):
@@ -142,6 +124,8 @@ func _physics_process_peer_client(_delta):
 	if authority_player:
 		var to_authority = authority_player.global_position - global_position
 		to_authority.y = 0	# Project onto horizontal plane
+		to_authority = to_authority.normalized()
+		%POVDir.text = "POV Dir: " + str(to_authority)
 
 		var auth_camera = authority_player.get_node_or_null("CameraPivot/Camera3D")
 		if auth_camera:
@@ -156,6 +140,13 @@ func _physics_process_peer_client(_delta):
 			
 			# Display camera angle for debugging
 			%DirToCamera.text = "Angle to camera: %.2f°" % camera_angle_deg
+			
+			# TODO: Why do these magic numbers work?
+			if camera_angle_deg > 90 or camera_angle_deg < -90:
+				if last_direction == "up":
+					last_direction = "down"
+				elif last_direction == "down":
+					last_direction = "up"
 		
 		# Calculate angle in radians
 		var forward = -global_transform.basis.z
@@ -165,14 +156,11 @@ func _physics_process_peer_client(_delta):
 		var angle_rad = forward.signed_angle_to(to_authority.normalized(), Vector3.UP)
 		var angle_deg = rad_to_deg(angle_rad)
 
+
 		
 		# Display angle for debugging
 		%RotToPlayer.text = "Angle to auth: %.2f°" % angle_deg
-
-		# TODO: Remove this if direction_arrow is no longer being used
-		var direction_arrow = get_node_or_null("DirectionArrow")
-		if direction_arrow:
-			direction_arrow.rotation.y = camera_angle_rad
+		%LastDirection.text = "Last Direction: " + last_direction
 
 	_apply_animation()
 
